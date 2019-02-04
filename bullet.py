@@ -12,11 +12,11 @@ class Bullet(Object):
             super(Bullet, Bullet).position_shift(obj, game)
         else:
             new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-            for o in game.targets:
+            for o in game.units:
                 if o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius):
                     obj.active = False
                     o.active = False
-                    game.bullets.append(Explosion(o))
+                    game.effects.append(Explosion(o))
                     break
             else:
                 obj.pos = new_pos

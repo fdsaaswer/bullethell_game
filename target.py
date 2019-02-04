@@ -10,7 +10,7 @@ class Target(Object):
     @staticmethod
     def position_shift(obj, game):
         new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-        for o in game.targets:
+        for o in game.units:
             if o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius):
                 o.speed, obj.speed = obj.speed, o.speed
                 break
@@ -22,7 +22,7 @@ class Target(Object):
 
         @utils.with_chance(0.001)
         def spawn(obj, game):
-            game.bullets.append(Bullet(
+            game.effects.append(Bullet(
                 self.pos,
                 [(random()-0.5)*2., 1. + random()*1.],
                 5

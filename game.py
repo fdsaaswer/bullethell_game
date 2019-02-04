@@ -5,6 +5,8 @@ import time
 from random import random
 
 from target import Target
+from player import Player
+from player import Action
 import utils
 
 class Background:
@@ -57,10 +59,11 @@ class Background:
 
 class Game:
     def __init__(self, width, height):
-        self.bullets = []
-        self.targets = []
         self.width = width
         self.height = height
+        self.player = Player([self.width/2., self.height - 100.], [0., 0.], 15)
+        self.effects = []
+        self.units = [self.player]
         self.bgr = [Background(self.width, self.height),
                     Background(self.width, self.height)]
         self.bgr_active = 0
@@ -73,27 +76,27 @@ class Game:
         if random() < 0.1:
             spawn_pos = [random()*self.width, 0.]
             spawn_radius = 15
-            for obj in self.targets:
+            for obj in self.units:
                 if utils.dist(spawn_pos, obj.pos) < (spawn_radius + obj.radius):
                     break
             else:
-                self.targets.append(Target(
+                self.units.append(Target(
                     spawn_pos,
                     [(random()-0.5)*2., random()*1.],
                     spawn_radius
                 ))
-        for i in range(len(self.bullets) - 1, -1, -1):
-            obj = self.bullets[i]
+        for i in range(len(self.effects) - 1, -1, -1):
+            obj = self.effects[i]
             for func in obj.on_update:
                 func(obj, self)
             if not obj.active:
-                del self.bullets[i]
-        for i in range(len(self.targets) - 1, -1, -1):
-            obj = self.targets[i]
+                del self.effects[i]
+        for i in range(len(self.units) - 1, -1, -1):
+            obj = self.units[i]
             for func in obj.on_update:
                 func(obj, self)
             if not obj.active:
-                del self.targets[i]
+                del self.units[i]
 
     def draw(self):
         self.surface.fill((255, 255, 255))
@@ -104,9 +107,9 @@ class Game:
             self.bgr[1-self.bgr_active] = Background(self.width, self.height)
             self.bgr_active = 1-self.bgr_active
             self.bgr_offset = 0
-        for object in self.targets:
+        for object in self.units:
             object.draw(self.surface)
-        for object in self.bullets:
+        for object in self.effects:
             object.draw(self.surface)
         pygame.display.flip()
 
@@ -121,8 +124,26 @@ if __name__=='__main__':
         game.draw()
         after = time.clock()
         event = pygame.event.poll()
-        if event.type is pygame.KEYDOWN and event.key is pygame.K_ESCAPE:
-            exit(0)
+        key2action = { # update in options
+            pygame.K_SPACE: Action.ATTACK,
+            pygame.K_LEFT: Action.MOVE_LEFT,
+            pygame.K_RIGHT: Action.MOVE_RIGHT,
+            pygame.K_UP: Action.MOVE_UP,
+            pygame.K_DOWN: Action.MOVE_DOWN
+        }
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                exit(0)
+            try:
+                game.player.action |= key2action[event.key]
+            except KeyError:
+                pass # undefined key binding
+        if event.type == pygame.KEYUP:
+            try:
+                game.player.action &= ~key2action[event.key]
+            except KeyError:
+                pass # undefined key binding
+
         TIME_PERIOD = 0.01
         if after-before < TIME_PERIOD:
             time.sleep(TIME_PERIOD-(after-before))
