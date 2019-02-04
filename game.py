@@ -5,8 +5,6 @@ import time
 from random import random
 
 from target import Target
-from bullet import Bullet
-from object import Object
 import utils
 
 class Background:
