@@ -61,7 +61,7 @@ class Game:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.player = Player([self.width/2., self.height - 100.], [0., 0.], 15)
+        self.player = Player([self.width/2., self.height - 100.], [0., 0.], 15.)
         self.effects = []
         self.units = [self.player]
         self.bgr = [Background(self.width, self.height),
@@ -75,7 +75,7 @@ class Game:
         #spawn_target
         if random() < 0.1:
             spawn_pos = [random()*self.width, 0.]
-            spawn_radius = 15
+            spawn_radius = 15.
             for obj in self.units:
                 if utils.dist(spawn_pos, obj.pos) < (spawn_radius + obj.radius):
                     break
@@ -85,17 +85,21 @@ class Game:
                     [(random()-0.5)*2., random()*1.],
                     spawn_radius
                 ))
+        print(len(self.effects))
         for i in range(len(self.effects) - 1, -1, -1):
             obj = self.effects[i]
-            for func in obj.on_update:
-                func(obj, self)
-            if not obj.active:
+            if obj.active:
+                for func in obj.on_update:
+                    func(obj, self)
+            if not obj.active: # can be updated during function execution
                 del self.effects[i]
+        print(len(self.units))
         for i in range(len(self.units) - 1, -1, -1):
             obj = self.units[i]
-            for func in obj.on_update:
-                func(obj, self)
-            if not obj.active:
+            if obj.active:
+                for func in obj.on_update:
+                    func(obj, self)
+            if not obj.active: # can be updated during function execution
                 del self.units[i]
 
     def draw(self):

@@ -10,10 +10,11 @@ class Target(Object):
     @staticmethod
     def position_shift(obj, game):
         new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-        for o in game.units:
-            if o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius):
-                o.speed, obj.speed = obj.speed, o.speed
-                break
+        to_hit_units = [o for o in game.units
+                        if o.active and o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius)]
+        for to_hit in to_hit_units:
+            to_hit.speed, obj.speed = obj.speed, to_hit.speed
+            break
         else:
             obj.pos = new_pos
 
@@ -25,7 +26,7 @@ class Target(Object):
             game.effects.append(Bullet(
                 self.pos,
                 [(random()-0.5)*2., 1. + random()*1.],
-                5
+                5.
             ))
         self.on_update.append(spawn)
 
@@ -33,5 +34,5 @@ class Target(Object):
         if not self.active:
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, (255, 255, 255), draw_pos, self.radius, 0)
-        pygame.draw.circle(surface, (0, 0, 0), draw_pos, self.radius, 1)
+        pygame.draw.circle(surface, (255, 255, 255), draw_pos, int(self.radius), 0)
+        pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 1)

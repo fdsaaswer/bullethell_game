@@ -1,7 +1,7 @@
 import pygame
 
 from object import Object
-from object import Explosion
+from explosion import Explosion
 import utils
 
 class Bullet(Object):
@@ -12,14 +12,15 @@ class Bullet(Object):
             super(Bullet, Bullet).position_shift(obj, game)
         else:
             new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-            for to_hit in game.units:
-                if to_hit != obj and utils.dist(to_hit.pos, new_pos) < (to_hit.radius + obj.radius):
-                    for func in obj.on_hit:
-                        func(obj, game)
-                    obj.active = False
-                    to_hit.active = False
-                    game.effects.append(Explosion(to_hit))
-                    break
+            to_hit_units = [o for o in game.units
+                            if o.active and o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius)]
+            for to_hit in to_hit_units:
+                for func in obj.on_hit:
+                    func(obj, game)
+                obj.active = False
+                to_hit.active = False
+                game.effects.append(Explosion(to_hit))
+                break
             else:
                 obj.pos = new_pos
 
@@ -39,4 +40,4 @@ class Bullet(Object):
             return
         color = (self.charge*100. if self.charge < 1. else 255., 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, color, draw_pos, self.radius, 0)
+        pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0)
