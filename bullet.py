@@ -12,17 +12,20 @@ class Bullet(Object):
             super(Bullet, Bullet).position_shift(obj, game)
         else:
             new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-            for o in game.units:
-                if o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius):
+            for to_hit in game.units:
+                if to_hit != obj and utils.dist(to_hit.pos, new_pos) < (to_hit.radius + obj.radius):
+                    for func in obj.on_hit:
+                        func(obj, game)
                     obj.active = False
-                    o.active = False
-                    game.effects.append(Explosion(o))
+                    to_hit.active = False
+                    game.effects.append(Explosion(to_hit))
                     break
             else:
                 obj.pos = new_pos
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.on_hit = []
 
         def charge_up(obj, game):
             if obj.charge < 1.:

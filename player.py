@@ -23,6 +23,7 @@ class Player(Object):
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.score = 1
 
         def process_action(obj, game):
             if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
@@ -38,12 +39,17 @@ class Player(Object):
             elif obj.action & Action.MOVE_DOWN:
                 obj.speed[1] += 0.05
             if obj.action & Action.ATTACK:
-                game.effects.append(Bullet(
+                obj.action &= ~Action.ATTACK
+                bullet = Bullet(
                     self.pos,
                     [0., -1.],
                     5
-                ))
-                obj.action &= ~Action.ATTACK
+                )
+                game.effects.append(bullet)
+
+                def player_score(obj, game):
+                    self.score += 0
+                bullet.on_hit.append(player_score)
 
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
@@ -53,3 +59,7 @@ class Player(Object):
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (0, 0, 0), draw_pos, self.radius, 0)
+        pygame.font.init()
+        font = pygame.font.SysFont('consolas', 20)
+        text_surface = font.render(str(self.score), True, (255, 0, 0))
+        surface.blit(text_surface, (50, 50, 100, 50))
