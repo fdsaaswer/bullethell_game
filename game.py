@@ -73,7 +73,7 @@ class Game:
 
     def update(self):
         #spawn_target
-        if random() < 0.1:
+        if random() < 0.01:
             spawn_pos = [random()*self.width, 0.]
             spawn_radius = 15.
             for obj in self.units:

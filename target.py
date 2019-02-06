@@ -2,6 +2,7 @@ import pygame
 from random import random
 
 from object import Object
+from explosion import Explosion
 from bullet import Bullet
 import utils
 
@@ -20,6 +21,17 @@ class Target(Object):
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.on_get_hit = []
+
+        def damage(obj, game):
+            obj.hp -= 1
+            if obj.hp <= 0:
+                obj.active = False
+                game.effects.append(Explosion(obj))
+        self.hp = 1
+        if random() < 0.5: self.hp += 1
+        if random() < 0.5: self.hp += 1
+        self.on_get_hit.append(damage)
 
         @utils.with_chance(0.001)
         def spawn(obj, game):
@@ -35,4 +47,6 @@ class Target(Object):
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (255, 255, 255), draw_pos, int(self.radius), 0)
-        pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 1)
+        for i in range(self.hp):
+            pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius) - 2*i, 1)
+
