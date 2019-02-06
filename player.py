@@ -1,4 +1,5 @@
 import pygame
+import math
 from enum import IntEnum
 
 from object import Object
@@ -19,11 +20,13 @@ class Player(Object):
 
     @staticmethod
     def position_shift(obj, game):
+        obj.energy += 0.001
         super(Player, Player).position_shift(obj, game)
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
         self.score = 0
+        self.energy = 1.
 
         def process_action(obj, game):
             if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
@@ -40,16 +43,18 @@ class Player(Object):
                 obj.speed[1] += 0.05
             if obj.action & Action.ATTACK:
                 obj.action &= ~Action.ATTACK
-                bullet = Bullet(
-                    self.pos,
-                    [0., -1.],
-                    5.
-                )
-                game.effects.append(bullet)
+                if obj.energy >= 0.1:
+                    obj.energy -= 0.1
+                    bullet = Bullet(
+                        obj.pos,
+                        [0., -1.],
+                        5.
+                    )
+                    game.effects.append(bullet)
 
-                def player_score(obj, game):
-                    self.score += 1
-                bullet.on_hit.append(player_score)
+                    def player_score(obj, game):
+                        self.score += 1
+                    bullet.on_hit.append(player_score)
 
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
@@ -59,6 +64,8 @@ class Player(Object):
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 0)
+        pygame.draw.arc(surface, (255, 0, 0), [draw_pos[0] - 5, draw_pos[1] - 5, 10, 10], 0., 2*math.pi*self.energy, 1)
+
         pygame.font.init()
         font = pygame.font.SysFont('consolas', 20)
         text_surface = font.render(str(self.score), True, (255, 0, 0))
