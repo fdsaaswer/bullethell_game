@@ -4,6 +4,7 @@ import collections
 import time
 from random import random
 
+from collision_point import CollisionPoint
 from target import Target
 from player import Player
 from player import Action
@@ -11,7 +12,7 @@ import utils
 
 class Background:
 
-    def __init__(self, x, y, depth = 0):
+    def __init__(self, x, y, depth=0):
         self.x = x
         self.y = y
         self.depth = depth
@@ -44,7 +45,6 @@ class Background:
                                               offset_x=new_x_start, offset_y=new_y_start))
 
     def draw(self, surface, offset_x, offset_y):
-        #pygame.draw.rect(surface, (self.color, self.color, self.color), (offset_x, offset_y, self.x, self.y), 0)
         try:
             rect_to_draw = [self.rect[0] + offset_x,
                             self.rect[1] + offset_y,
@@ -62,8 +62,8 @@ class Game:
         self.width = width
         self.height = height
         self.player = Player([self.width/2., self.height - 100.], [0., 0.], 15.)
-        self.effects = []
-        self.units = [self.player]
+        self.effects = []  # e.g. bullets, explosions, power-ups, etc
+        self.units = [self.player]  # 'physical' objects, e.g. can collide
         self.bgr = [Background(self.width, self.height),
                     Background(self.width, self.height)]
         self.bgr_active = 0
@@ -73,7 +73,7 @@ class Game:
 
     def update(self):
         #spawn_target
-        if random() < 0.01:
+        if random() < 0.0:
             spawn_pos = [random()*self.width, 0.]
             spawn_radius = 15.
             for obj in self.units:
@@ -85,22 +85,20 @@ class Game:
                     [(random()-0.5)*2., random()*1.],
                     spawn_radius
                 ))
-        print(len(self.effects))
-        for i in range(len(self.effects) - 1, -1, -1):
-            obj = self.effects[i]
-            if obj.active:
-                for func in obj.on_update:
-                    func(obj, self)
-            if not obj.active: # can be updated during function execution
-                del self.effects[i]
-        print(len(self.units))
-        for i in range(len(self.units) - 1, -1, -1):
-            obj = self.units[i]
-            if obj.active:
-                for func in obj.on_update:
-                    func(obj, self)
-            if not obj.active: # can be updated during function execution
-                del self.units[i]
+        if random() < 0.01:
+            spawn_pos = [random()*self.width, random()*self.height]
+            self.units.append(CollisionPoint(spawn_pos))
+
+        for objects in [self.effects, self.units]:
+            print(len(objects))
+            for i in range(len(objects) - 1, -1, -1):
+                obj = objects[i]
+                if obj.active:
+                    for func in obj.on_update:
+                        func(obj, self)
+                if not obj.active:  # can be updated during function execution
+                    del objects[i]
+
 
     def draw(self):
         self.surface.fill((255, 255, 255))
