@@ -23,14 +23,12 @@ class Explosion(Object):
             except AttributeError:
                 obj.already_hit = set()
 
-            to_hit_units = [o for o in game.units
-                            if o.active and o != obj and utils.dist(o.pos, obj.pos) < (o.radius + obj.radius)]
-            for to_hit_obj in to_hit_units:
-                if to_hit_obj in obj.already_hit:
+            for to_hit in utils.colliding_objects(obj, game):
+                if to_hit in obj.already_hit:
                     continue
-                obj.already_hit.add(to_hit_obj)
-                for func in to_hit_obj.on_get_hit:
-                    func(to_hit_obj, game)
+                obj.already_hit.add(to_hit)
+                for func in to_hit.on_get_hit:
+                    func(to_hit, game)
 
         self.charge = 0
         self.on_update.append(charge_up)

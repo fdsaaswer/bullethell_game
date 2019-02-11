@@ -4,7 +4,7 @@ class Object:
 
     @staticmethod
     def position_shift(obj, game):
-        obj.pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
+        obj.pos = [obj.pos[idx] + obj.speed[idx] for idx, _ in enumerate(obj.pos)]
 
     def __init__(self, pos, speed, radius):
         if len(pos) != len(speed):

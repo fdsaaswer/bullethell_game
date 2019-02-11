@@ -8,20 +8,13 @@ class Bullet(Object):
 
     @staticmethod
     def position_shift(obj, game):
-        if obj.charge < 1.:
-            super(Bullet, Bullet).position_shift(obj, game)
-        else:
-            new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-            to_hit_units = [o for o in game.units
-                            if o.active and o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius)]
-            for to_hit_obj in to_hit_units:
+        super(Bullet, Bullet).position_shift(obj, game)
+        if obj.charge >= 1.:
+            for to_hit in utils.colliding_objects(obj, game):
                 for func in obj.on_hit:
                     func(obj, game)
-                for func in to_hit_obj.on_get_hit:
-                    func(to_hit_obj, game)
-                break
-            else:
-                obj.pos = new_pos
+                for func in to_hit.on_get_hit:
+                    func(to_hit, game)
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)

@@ -10,14 +10,12 @@ class Target(Object):
 
     @staticmethod
     def position_shift(obj, game):
-        new_pos = [obj.pos[idx] + obj.speed[idx] for idx, ignored in enumerate(obj.pos)]
-        to_hit_units = [o for o in game.units
-                        if o.active and o != obj and utils.dist(o.pos, new_pos) < (o.radius + obj.radius)]
-        for to_hit in to_hit_units:
+        old_pos = obj.pos
+        super(Bullet, Bullet).position_shift(obj, game)
+        for to_hit in utils.colliding_objects(obj, game):
             to_hit.speed, obj.speed = obj.speed, to_hit.speed
+            obj.pos = old_pos
             break
-        else:
-            obj.pos = new_pos
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
