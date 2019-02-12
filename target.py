@@ -13,7 +13,8 @@ class Target(Object):
         old_pos = obj.pos
         super(Bullet, Bullet).position_shift(obj, game)
         for to_hit in utils.colliding_objects(obj, game):
-            to_hit.speed, obj.speed = obj.speed, to_hit.speed
+            utils.collide(obj, to_hit)
+            utils.collide(to_hit, obj)
             obj.pos = old_pos
             break
 

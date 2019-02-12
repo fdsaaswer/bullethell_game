@@ -4,7 +4,6 @@ import collections
 import time
 from random import random
 
-from collision_point import CollisionPoint
 from target import Target
 from player import Player
 from player import Action
@@ -73,21 +72,14 @@ class Game:
 
     def update(self):
         #spawn_target
-        if random() < 0.0:
-            spawn_pos = [random()*self.width, 0.]
-            spawn_radius = 15.
-            for obj in self.units:
-                if utils.dist(spawn_pos, obj.pos) < (spawn_radius + obj.radius):
-                    break
-            else:
-                self.units.append(Target(
-                    spawn_pos,
+        if random() < 0.02:
+            spawn_obj = Target(
+                    [random() * self.width, 0.],
                     [(random()-0.5)*2., random()*1.],
-                    spawn_radius
-                ))
-        if random() < 0.01:
-            spawn_pos = [random()*self.width, random()*self.height]
-            self.units.append(CollisionPoint(spawn_pos))
+                    15.
+                )
+            if not utils.colliding_objects(spawn_obj, self):
+                self.units.append(spawn_obj)
 
         for objects in [self.effects, self.units]:
             print(len(objects))

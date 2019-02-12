@@ -18,10 +18,6 @@ def dist(pos_1, pos_2):
     return math.sqrt(a*a + b*b)
 
 
-def colliding_objects(obj, game):
-    return [o for o in game.units if o.active and o != obj and dist(o.pos, obj.pos) < (o.radius + obj.radius)]
-
-
 def cartesian2polar(coord):
     phi = math.atan2(coord[1], coord[0])
     rho = math.sqrt(coord[0] ** 2 + coord[1] ** 2)
@@ -32,3 +28,16 @@ def polar2cartesian(coord):
     x = coord[0] * math.cos(coord[1])
     y = coord[0] * math.sin(coord[1])
     return [x, y]
+
+
+def colliding_objects(obj, game):
+    return [o for o in game.units if o.active and dist(o.pos, obj.pos) < (o.radius + obj.radius) and o != obj]
+
+
+def collide(obj, to_hit):
+    v_to_hit = cartesian2polar([- to_hit.pos[0] + obj.pos[0], - to_hit.pos[1] + obj.pos[1]])
+    v_speed = cartesian2polar(to_hit.speed)
+    if dist(to_hit.speed, polar2cartesian(v_speed)) > 1e-6:
+        raise AttributeError("Coordinate conversion failed: mismatch")
+    v_speed[1] = 2. * v_to_hit[1] + math.pi - v_speed[1]
+    to_hit.speed = polar2cartesian(v_speed)
