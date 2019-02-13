@@ -2,26 +2,41 @@ import pygame
 from random import random
 import collections
 
+
 class Background:
     def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.bgr_active = 0
-        self.bgr_offset = 0
-        self.bgr = [BackgroundInternal(self.width, self.height),
-                    BackgroundInternal(self.width, self.height)]
+        self._width = width
+        self._height = height
+        self._bgr_active = 0
+        self._bgr_offset = 0
+        self._bgr_surface = [background_surface(width, height),
+                             background_surface(width, height)]
 
     def update(self):
-        self.bgr_offset += 1
-        if self.bgr_offset == self.height:
-            self.bgr[1-self.bgr_active] = BackgroundInternal(self.width, self.height)
-            self.bgr_active = 1-self.bgr_active
-            self.bgr_offset = 0
+        self._bgr_offset += 1
+        if self._bgr_offset == self._height:
+            self._bgr_surface[1-self._bgr_active] = background_surface(self._width, self._height)
+            self._bgr_active = 1-self._bgr_active
+            self._bgr_offset = 0
 
     def draw(self, surface):
-        surface.fill((255, 255, 255))
-        self.bgr[self.bgr_active].draw(surface, 0., self.bgr_offset - self.height)
-        self.bgr[1-self.bgr_active].draw(surface, 0., self.bgr_offset)
+        surface.blit(
+            self._bgr_surface[self._bgr_active],
+            (0., 0.),
+            (0., self._height - self._bgr_offset, self._width, self._height)
+        )
+        surface.blit(
+            self._bgr_surface[1-self._bgr_active],
+            (0., self._bgr_offset),
+            (0., 0., self._width, self._height - self._bgr_offset)
+        )
+
+
+def background_surface(width, height):
+    surface = pygame.Surface((width, height))
+    surface.fill((255, 255, 255))
+    BackgroundInternal(width, height).draw(surface, 0., 0.)
+    return surface
 
 
 class BackgroundInternal:
