@@ -1,26 +1,16 @@
 import pygame
 from random import random
 
-from object import Object
+from object import Unit
 from explosion import Explosion
 from bullet import Bullet
 import utils
 
-class Target(Object):
 
-    @staticmethod
-    def position_shift(obj, game):
-        old_pos = obj.pos
-        super(Bullet, Bullet).position_shift(obj, game)
-        for to_hit in utils.colliding_objects(obj, game):
-            utils.collide(obj, to_hit)
-            utils.collide(to_hit, obj)
-            obj.pos = old_pos
-            break
+class Target(Unit):
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
-        self.on_get_hit = []
 
         def damage(obj, game):
             obj.hp -= 1
@@ -35,7 +25,7 @@ class Target(Object):
         @utils.with_chance(0.001)
         def spawn(obj, game):
             game.effects.append(Bullet(
-                self.pos,
+                self.pos.copy(),
                 [(random()-0.5)*2., 1. + random()*1.],
                 5.
             ))

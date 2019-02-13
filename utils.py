@@ -34,10 +34,15 @@ def colliding_objects(obj, game):
     return [o for o in game.units if o.active and dist(o.pos, obj.pos) < (o.radius + obj.radius) and o != obj]
 
 
-def collide(obj, to_hit):
-    v_to_hit = cartesian2polar([- to_hit.pos[0] + obj.pos[0], - to_hit.pos[1] + obj.pos[1]])
-    v_speed = cartesian2polar(to_hit.speed)
-    if dist(to_hit.speed, polar2cartesian(v_speed)) > 1e-6:
+def collide(obj, anchor):  # modifies obj.speed
+    approach = cartesian2polar([anchor.pos[0] - obj.pos[0], anchor.pos[1] - obj.pos[1]])
+    speed = cartesian2polar(obj.speed)
+    if dist(obj.speed, polar2cartesian(speed)) > 1e-6:
         raise AttributeError("Coordinate conversion failed: mismatch")
-    v_speed[1] = 2. * v_to_hit[1] + math.pi - v_speed[1]
-    to_hit.speed = polar2cartesian(v_speed)
+    if abs(speed[1] - approach[1]) > 0.5*math.pi:
+        speed[1] = approach[1] + math.pi
+        speed[0] *= 1.25
+    else:
+        speed[1] = 2. * approach[1] + math.pi - speed[1]
+        speed[0] *= 0.8
+    obj.speed = polar2cartesian(speed)

@@ -2,12 +2,10 @@ import pygame
 import math
 from enum import IntEnum
 
-from object import Object
+from object import Unit
 from bullet import Bullet
-import utils
 
 
-#constants
 class Action(IntEnum):
     NO_ACTION = 0
     MOVE_LEFT = 1
@@ -16,17 +14,11 @@ class Action(IntEnum):
     MOVE_DOWN = 8
     ATTACK = 16
 
-class Player(Object):
-
-    @staticmethod
-    def position_shift(obj, game):
-        obj.energy += 0.001
-        super(Player, Player).position_shift(obj, game)
+class Player(Unit):
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
         self.score = 0
-        self.energy = 1.
 
         def process_action(obj, game):
             if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
@@ -46,7 +38,7 @@ class Player(Object):
                 if obj.energy >= 0.1:
                     obj.energy -= 0.1
                     bullet = Bullet(
-                        obj.pos,
+                        obj.pos.copy(),
                         [0., -1.],
                         5.
                     )
@@ -55,9 +47,13 @@ class Player(Object):
                     def player_score(obj, game):
                         self.score += 1
                     bullet.on_hit.append(player_score)
-
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
+
+        def recharge_energy(obj, game):
+            obj.energy += 0.001
+        self.on_update.append(recharge_energy)
+        self.energy = 1.
 
     def draw(self, surface):
         if not self.active:
