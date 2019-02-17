@@ -35,7 +35,8 @@ class DefendedTarget(Target):
 
         @utils.with_chance(0.01)
         def add_defender(obj, game):
-            target_units = utils.units_in_radius_matching_condition(obj, game, self.DEFENDER_MAX_DISTANCE, lambda x: True)
+            target_units = utils.units_in_radius_matching_condition(obj, game, self.DEFENDER_MAX_DISTANCE,
+                                                                    lambda x: True if isinstance(x, Target) else False)
             if target_units:
                 obj.defenders.append(choice(target_units))
 

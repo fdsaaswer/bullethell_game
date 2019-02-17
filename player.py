@@ -55,6 +55,10 @@ class Player(Unit):
         self.charge = 0.
         self.on_update.append(charge_up)
 
+        def game_over(obj, game):
+            exit(0)
+        self.on_get_hit.append(game_over)
+
     def draw(self, surface):
         if not self.active:
             return
