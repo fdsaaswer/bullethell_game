@@ -35,8 +35,8 @@ class Player(Unit):
                 obj.speed[1] += 0.05
             if obj.action & Action.ATTACK:
                 obj.action &= ~Action.ATTACK
-                if obj.energy >= 0.1:
-                    obj.energy -= 0.1
+                if obj.charge >= 0.1:
+                    obj.charge -= 0.1
                     bullet = Bullet(
                         obj.pos.copy(),
                         [0., -1.]
@@ -49,18 +49,20 @@ class Player(Unit):
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
 
-        def recharge_energy(obj, game):
-            obj.energy += 0.001
-        self.on_update.append(recharge_energy)
-        self.energy = 1.
+        def charge_up(obj, game):
+            if obj.charge < 1.:
+                obj.charge += 0.001
+        self.charge = 0.
+        self.on_update.append(charge_up)
 
     def draw(self, surface):
         if not self.active:
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 0)
-        pygame.draw.arc(surface, (255, 0, 0), [draw_pos[0] - 5, draw_pos[1] - 5, 10, 10], 0., 2*math.pi*self.energy, 1)
-
+        pygame.draw.circle(surface,
+                           (self.charge*150. if self.charge < 1. else 255., 0, 0),
+                           draw_pos, int(self.radius), 4)
         pygame.font.init()
         font = pygame.font.SysFont('consolas', 20)
         text_surface = font.render(str(self.score), True, (255, 0, 0))

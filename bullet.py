@@ -27,13 +27,13 @@ class Bullet(Object):
         def charge_up(obj, game):
             if obj.charge < 1.:
                 obj.charge += 0.01
-        self.charge = 0
+        self.charge = 0.
         self.on_update.append(charge_up)
 
 
     def draw(self, surface):
         if not self.active:
             return
-        color = (self.charge*100. if self.charge < 1. else 255., 0., 0.)
+        color = (self.charge*150. if self.charge < 1. else 255., 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0)
