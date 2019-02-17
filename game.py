@@ -3,6 +3,7 @@ import pygame.locals
 from random import random
 
 from target import Target
+from defended_target import DefendedTarget
 from player import Player
 from player import Action
 from background import Background
@@ -43,6 +44,14 @@ class Game:
             )
             if not utils.colliding_objects(spawn_obj, self):
                 self.units.append(spawn_obj)
+        elif random() < 0.002:
+            spawn_obj = DefendedTarget(
+                [random() * self.width, 0.],
+                [(random() - 0.5) * 2., random() * 1.]
+            )
+            if not utils.colliding_objects(spawn_obj, self):
+                self.units.append(spawn_obj)
+
 
     def draw(self):
         self._bgr.draw(self._surface)

@@ -34,6 +34,10 @@ def colliding_objects(obj, game):
     return [o for o in game.units if o.active and dist(o.pos, obj.pos) < (o.radius + obj.radius) and o != obj]
 
 
+def units_in_radius_matching_condition(obj, game, radius, function):
+    return [o for o in game.units if o.active and dist(o.pos, obj.pos) < radius and o != obj and function(o)]
+
+
 def collide(obj, anchor):  # modifies obj.speed
     approach = cartesian2polar([anchor.pos[0] - obj.pos[0], anchor.pos[1] - obj.pos[1]])
     speed = cartesian2polar(obj.speed)

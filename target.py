@@ -9,26 +9,29 @@ import utils
 
 class Target(Unit):
 
-    def __init__(self, pos, speed):
-        super().__init__(pos, speed, 15.)
+    @staticmethod
+    def damage(obj, game):
+        obj.hp -= 1
+        if obj.hp <= 0:
+            obj.active = False
+            game.effects.append(Explosion(obj))
 
-        def damage(obj, game):
-            obj.hp -= 1
-            if obj.hp <= 0:
-                obj.active = False
-                game.effects.append(Explosion(obj))
+    @staticmethod
+    @utils.with_chance(0.001)
+    def spawn(obj, game):
+        game.effects.append(Bullet(
+            obj.pos.copy(),
+            [(random() - 0.5) * 2., 1. + random() * 1.]
+        ))
+
+    def __init__(self, pos, speed, radius=15.):
+        super().__init__(pos, speed, radius)
+
         self.hp = 1
         if random() < 0.5: self.hp += 1
         if random() < 0.5: self.hp += 1
-        self.on_get_hit.append(damage)
-
-        @utils.with_chance(0.001)
-        def spawn(obj, game):
-            game.effects.append(Bullet(
-                self.pos.copy(),
-                [(random()-0.5)*2., 1. + random()*1.]
-            ))
-        self.on_update.append(spawn)
+        self.on_get_hit.append(self.damage)
+        self.on_update.append(self.spawn)
 
     def draw(self, surface):
         if not self.active:
