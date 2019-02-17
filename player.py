@@ -16,8 +16,8 @@ class Action(IntEnum):
 
 class Player(Unit):
 
-    def __init__(self, pos, speed, radius):
-        super().__init__(pos, speed, radius)
+    def __init__(self, pos, speed):
+        super().__init__(pos, speed, 15.)
         self.score = 0
 
         def process_action(obj, game):
@@ -39,8 +39,7 @@ class Player(Unit):
                     obj.energy -= 0.1
                     bullet = Bullet(
                         obj.pos.copy(),
-                        [0., -1.],
-                        5.
+                        [0., -1.]
                     )
                     game.effects.append(bullet)
 

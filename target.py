@@ -9,8 +9,8 @@ import utils
 
 class Target(Unit):
 
-    def __init__(self, pos, speed, radius):
-        super().__init__(pos, speed, radius)
+    def __init__(self, pos, speed):
+        super().__init__(pos, speed, 15.)
 
         def damage(obj, game):
             obj.hp -= 1
@@ -26,8 +26,7 @@ class Target(Unit):
         def spawn(obj, game):
             game.effects.append(Bullet(
                 self.pos.copy(),
-                [(random()-0.5)*2., 1. + random()*1.],
-                5.
+                [(random()-0.5)*2., 1. + random()*1.]
             ))
         self.on_update.append(spawn)
 

@@ -16,8 +16,8 @@ class Bullet(Object):
                 for func in to_hit.on_get_hit:
                     func(to_hit, game)
 
-    def __init__(self, pos, speed, radius):
-        super().__init__(pos, speed, radius)
+    def __init__(self, pos, speed):
+        super().__init__(pos, speed, 5.)
         self.on_hit = []
 
         def disappear(obj, game):
