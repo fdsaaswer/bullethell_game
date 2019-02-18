@@ -68,6 +68,8 @@ class Game:
                         func(obj, self)
                 if not obj.active:  # can be updated during function execution
                     del objects[i]
+        if not self._player.active:
+            exit(0)
 
         # Not essential:
         def _spawn(game, obj, chance):

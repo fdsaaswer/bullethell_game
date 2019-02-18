@@ -19,12 +19,13 @@ class Unit(Object):
 
     @staticmethod
     def take_damage(obj, game):
-        obj.hp -= 1
-        if obj.hp <= 0:
+        obj.hp -= 1.
+        if obj.hp < 1.:
             obj.active = False
             game.add_effect(Explosion(obj))
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
         self.on_get_hit = [self.take_damage]
+        self.hp = 1.
         self.colliding_units = []

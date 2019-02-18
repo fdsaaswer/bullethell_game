@@ -17,10 +17,6 @@ class Action(IntEnum):
 
 class Player(Unit):
 
-    @staticmethod
-    def take_damage(obj, game):
-        exit(0)
-
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)
 
@@ -57,6 +53,7 @@ class Player(Unit):
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
         self.charge_speed = 0.001
+        self.hp += 3.
 
     def draw(self, surface):
         if not self.active:
@@ -68,5 +65,5 @@ class Player(Unit):
                            draw_pos, int(self.radius), 4)
         pygame.font.init()
         font = pygame.font.SysFont('consolas', 20)
-        text_surface = font.render(str(self.score), True, (255, 0, 0))
+        text_surface = font.render(str(self.score) + ', ' + str(self.hp), True, (255, 0, 0))
         surface.blit(text_surface, (50, 50, 100, 50))
