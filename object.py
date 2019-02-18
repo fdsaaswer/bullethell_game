@@ -1,7 +1,14 @@
+import math
+
 class Object:
 
     @staticmethod
     def position_shift(obj, game):
+        max_speed = 10.
+        speed_squared = obj.speed[0]**2 + obj.speed[1]**2
+        if speed_squared > max_speed**2:
+            obj.speed[0] *= max_speed / math.sqrt(speed_squared)
+            obj.speed[1] *= max_speed / math.sqrt(speed_squared)
         game.update_obj_pos(obj)
 
     @staticmethod

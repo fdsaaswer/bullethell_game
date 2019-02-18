@@ -2,6 +2,7 @@ import pygame
 import pygame.locals
 from random import random
 
+from unit import Unit
 from target import Target
 from defended_target import DefendedTarget
 from player import Player
@@ -30,6 +31,22 @@ class Game:
 
     def add_effect(self, obj):
         self._effects.append(obj)
+
+    def update_obj_pos(self, obj):
+        obj.pos[0] += obj.speed[0]
+        obj.pos[1] += obj.speed[1]
+        if obj.pos[1] + obj.radius < 0.:
+            obj.active = False
+        if obj.pos[1] - obj.radius > self._height:
+            obj.active = False
+        if isinstance(obj, Unit) and obj.pos[0] - obj.radius < 0.:
+            utils.collide(obj, [0., obj.pos[1]])
+        if obj.pos[0] + obj.radius < 0.:
+            obj.active = False
+        if isinstance(obj, Unit) and obj.pos[0] + obj.radius > self._width:
+            utils.collide(obj, [self._width, obj.pos[1]])
+        if obj.pos[0] - obj.radius > self._width:
+            obj.active = False
 
     def get_units(self, obj, radius, function): # get units in radius matching condition
         if radius == 0.:
@@ -66,18 +83,6 @@ class Game:
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
             ), 0.002)
-
-    def update_obj_pos(self, obj):
-        obj.pos[0] += obj.speed[0]
-        obj.pos[1] += obj.speed[1]
-        if obj.pos[1] + obj.radius < 0:
-            obj.active = False
-        if obj.pos[1] - obj.radius > self._height:
-            obj.active = False
-        if obj.pos[0] + obj.radius < 0:
-            obj.active = False
-        if obj.pos[0] - obj.radius > self._width:
-            obj.active = False
 
     def draw(self):
         self._bgr.draw(self._surface)

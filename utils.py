@@ -33,7 +33,7 @@ def polar2cartesian(coord):
 
 
 def collide(obj, anchor):  # modifies obj.speed
-    approach = cartesian2polar([anchor.pos[0] - obj.pos[0], anchor.pos[1] - obj.pos[1]])
+    approach = cartesian2polar([anchor[0] - obj.pos[0], anchor[1] - obj.pos[1]])
     speed = cartesian2polar(obj.speed)
     if dist(obj.speed, polar2cartesian(speed)) > 1e-6:
         raise AttributeError("Coordinate conversion failed: mismatch")

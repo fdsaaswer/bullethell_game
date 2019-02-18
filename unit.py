@@ -13,8 +13,8 @@ class Unit(Object):
         for to_hit in temp_colliding_units:
             if to_hit not in obj.colliding_units:
                 to_hit.colliding_units.append(obj)
-                utils.collide(to_hit, obj)
-                utils.collide(obj, to_hit)
+                utils.collide(to_hit, obj.pos)
+                utils.collide(obj, to_hit.pos)
         obj.colliding_units = temp_colliding_units
 
     @staticmethod
