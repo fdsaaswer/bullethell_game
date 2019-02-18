@@ -2,7 +2,7 @@ import pygame
 import math
 from enum import IntEnum
 
-from object import Unit
+from unit import Unit
 from bullet import Bullet
 
 
@@ -16,9 +16,12 @@ class Action(IntEnum):
 
 class Player(Unit):
 
+    @staticmethod
+    def take_damage(obj, game):
+        exit(0)
+
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)
-        self.score = 0
 
         def process_action(obj, game):
             if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
@@ -46,18 +49,10 @@ class Player(Unit):
                     def player_score(obj, game):
                         self.score += 1
                     bullet.on_hit.append(player_score)
+        self.score = 0
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
-
-        def charge_up(obj, game):
-            if obj.charge < 1.:
-                obj.charge += 0.001
-        self.charge = 0.
-        self.on_update.append(charge_up)
-
-        def game_over(obj, game):
-            exit(0)
-        self.on_get_hit.append(game_over)
+        self.charge_speed = 0.001
 
     def draw(self, surface):
         if not self.active:

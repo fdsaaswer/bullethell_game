@@ -1,20 +1,13 @@
 import pygame
 from random import random
 
-from object import Unit
+from unit import Unit
 from explosion import Explosion
 from bullet import Bullet
 import utils
 
 
 class Target(Unit):
-
-    @staticmethod
-    def damage(obj, game):
-        obj.hp -= 1
-        if obj.hp <= 0:
-            obj.active = False
-            game.effects.append(Explosion(obj))
 
     @staticmethod
     @utils.with_chance(0.001)
@@ -26,11 +19,9 @@ class Target(Unit):
 
     def __init__(self, pos, speed, radius=15.):
         super().__init__(pos, speed, radius)
-
         self.hp = 1
         if random() < 0.5: self.hp += 1
         if random() < 0.5: self.hp += 1
-        self.on_get_hit.append(self.damage)
         self.on_update.append(self.spawn)
 
     def draw(self, surface):

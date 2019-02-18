@@ -12,11 +12,9 @@ class DefendedTarget(Target):
     DEFENDER_MAX_DISTANCE = 150.
 
     @staticmethod
-    def damage(obj, game):
-        if obj.defenders:
-            pass
-        else:
-            super(DefendedTarget, DefendedTarget).damage(obj, game)
+    def take_damage(obj, game):
+        if not obj.defenders:
+            super(DefendedTarget, DefendedTarget).take_damage(obj, game)
 
     @staticmethod
     @utils.with_chance(0.001)

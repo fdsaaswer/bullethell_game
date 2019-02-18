@@ -18,18 +18,12 @@ class Bullet(Object):
 
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 5.)
+        self.charge_speed = 0.01
         self.on_hit = []
 
         def disappear(obj, game):
             obj.active = False
         self.on_hit.append(disappear)
-
-        def charge_up(obj, game):
-            if obj.charge < 1.:
-                obj.charge += 0.01
-        self.charge = 0.
-        self.on_update.append(charge_up)
-
 
     def draw(self, surface):
         if not self.active:
