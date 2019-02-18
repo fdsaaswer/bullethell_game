@@ -1,10 +1,9 @@
-import pygame
 import math
 from random import choice
 
-from target import Target
-from bullet import Bullet
 import utils
+from bullet import Bullet
+from target import Target
 
 
 class DefendedTarget(Target):

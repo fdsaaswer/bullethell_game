@@ -1,10 +1,10 @@
-import pygame
 from random import random
 
-from unit import Unit
-from explosion import Explosion
-from bullet import Bullet
+import pygame
+
 import utils
+from bullet import Bullet
+from unit import Unit
 
 
 class Target(Unit):

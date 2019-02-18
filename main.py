@@ -3,7 +3,7 @@ import time
 
 from game import Game
 
-if __name__=='__main__':
+if __name__ == '__main__':
     WIDTH = 1024
     HEIGHT = 768
     game = Game(WIDTH, HEIGHT)
@@ -15,6 +15,6 @@ if __name__=='__main__':
         after = time.clock()
         TIME_PERIOD = 0.01
         if after - before < TIME_PERIOD:
-            time.sleep(TIME_PERIOD-(after-before))
+            time.sleep(TIME_PERIOD - (after - before))
         else:
             print("Not enough time: " + str(after - before))

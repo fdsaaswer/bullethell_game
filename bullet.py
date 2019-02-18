@@ -1,8 +1,7 @@
 import pygame
 
 from object import Object
-from explosion import Explosion
-import utils
+
 
 class Bullet(Object):
 
@@ -23,11 +22,12 @@ class Bullet(Object):
 
         def disappear(obj, game):
             obj.active = False
+
         self.on_hit.append(disappear)
 
     def draw(self, surface):
         if not self.active:
             return
-        color = (self.charge*150. if self.charge < 1. else 255., 0., 0.)
+        color = (self.charge * 150. if self.charge < 1. else 255., 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0)

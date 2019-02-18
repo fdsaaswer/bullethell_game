@@ -1,9 +1,9 @@
-import pygame
-import math
 from enum import IntEnum
 
-from unit import Unit
+import pygame
+
 from bullet import Bullet
+from unit import Unit
 
 
 class Action(IntEnum):
@@ -13,6 +13,7 @@ class Action(IntEnum):
     MOVE_UP = 4
     MOVE_DOWN = 8
     ATTACK = 16
+
 
 class Player(Unit):
 
@@ -49,7 +50,9 @@ class Player(Unit):
 
                     def player_score(obj, game):
                         self.score += 1
+
                     bullet.on_hit.append(player_score)
+
         self.score = 0
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
@@ -61,7 +64,7 @@ class Player(Unit):
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 0)
         pygame.draw.circle(surface,
-                           (self.charge*150. if self.charge < 1. else 255., 0, 0),
+                           (self.charge * 150. if self.charge < 1. else 255., 0, 0),
                            draw_pos, int(self.radius), 4)
         pygame.font.init()
         font = pygame.font.SysFont('consolas', 20)

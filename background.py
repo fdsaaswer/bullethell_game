@@ -1,6 +1,6 @@
-import pygame
 from random import random
-import collections
+
+import pygame
 
 
 class Background:
