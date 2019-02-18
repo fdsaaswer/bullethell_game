@@ -47,6 +47,15 @@ class DefendedTarget(Target):
 
     def draw(self, surface):
         super().draw(surface)
+        N = 50
         for o in self.defenders:
-            pygame.draw.line(surface, (200., 200., 200.), self.pos, o.pos)
+            for i in range(N):
+                pos = [self.pos[0] + (o.pos[0] - self.pos[0]) * i / N,
+                       self.pos[1] + (o.pos[1] - self.pos[1]) * i / N]
+                if utils.dist(pos, o.pos) < o.radius:
+                    continue
+                if utils.dist(pos, self.pos) < self.radius:
+                    continue
+                pos = [int(pos[0]), int(pos[1])]
+                surface.set_at(pos, (200., 200., 200.))
 
