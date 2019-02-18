@@ -42,8 +42,9 @@ class Player(Unit):
                     obj.charge -= 0.1
                     bullet = Bullet(
                         obj.pos.copy(),
-                        [0., -1.]
+                        [0., -3.]
                     )
+                    bullet.charge_speed *= 3
                     game.effects.append(bullet)
 
                     def player_score(obj, game):
