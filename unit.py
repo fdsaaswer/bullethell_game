@@ -22,7 +22,7 @@ class Unit(Object):
         obj.hp -= 1.
         if obj.hp < 1.:
             obj.active = False
-            game.add_effect(Explosion(obj))
+            game.add_effect(Explosion(obj.pos.copy()))
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)

@@ -5,6 +5,7 @@ from random import random
 from unit import Unit
 from target import Target
 from defended_target import DefendedTarget
+from destroyer_target import DestroyerTarget
 from player import Player
 from player import Action
 from background import Background
@@ -84,7 +85,11 @@ class Game:
         _spawn(self, DefendedTarget(
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
-            ), 0.002)
+            ), 0.001)
+        _spawn(self, DestroyerTarget(
+                [random() * self._width, 0.],
+                [(random() - 0.5) * 2., random() * 1.]
+            ), 0.001)
 
     def draw(self):
         self._bgr.draw(self._surface)

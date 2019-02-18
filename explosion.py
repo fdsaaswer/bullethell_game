@@ -14,12 +14,6 @@ class Explosion(Object):
             return
         if obj.charge >= 0.75:  # black is safe
             return
-
-        try:
-            obj.already_hit
-        except AttributeError:
-            obj.already_hit = set()
-
         for to_hit in game.get_colliding_units(obj):
             if to_hit in obj.already_hit:
                 continue
@@ -27,9 +21,10 @@ class Explosion(Object):
             for func in to_hit.on_get_hit:
                 func(to_hit, game)
 
-    def __init__(self, obj):
-        super().__init__(obj.pos, [0., 1.], 10.)
+    def __init__(self, pos):
+        super().__init__(pos, [0., 1.], 10.)
         self.charge_speed = 0.01
+        self.already_hit = set()
 
     def draw(self, surface):
         if not self.active:
