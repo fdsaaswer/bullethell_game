@@ -24,6 +24,16 @@ class Game:
         self.width = width
         self.height = height
 
+    def _spawn(self, obj, chance):
+        if random() >= chance:
+            return
+        if not utils.colliding_objects(obj, self):
+            self.units.append(obj)
+
+    @property
+    def player_pos(self):
+        return self._player.pos
+
     def update(self):
         self._bgr.update()
         for objects in [self.effects, self.units]:
@@ -37,21 +47,14 @@ class Game:
                     del objects[i]
 
         # Not essential:
-        if random() < 0.02:
-            spawn_obj = Target(
+        self._spawn(Target(
                 [random() * self.width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
-            )
-            if not utils.colliding_objects(spawn_obj, self):
-                self.units.append(spawn_obj)
-        elif random() < 0.002:
-            spawn_obj = DefendedTarget(
+            ), 0.02)
+        self._spawn(DefendedTarget(
                 [random() * self.width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
-            )
-            if not utils.colliding_objects(spawn_obj, self):
-                self.units.append(spawn_obj)
-
+            ), 0.002)
 
     def draw(self):
         self._bgr.draw(self._surface)
