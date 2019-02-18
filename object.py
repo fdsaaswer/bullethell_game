@@ -2,16 +2,7 @@ class Object:
 
     @staticmethod
     def position_shift(obj, game):
-        obj.pos[0] += obj.speed[0]
-        obj.pos[1] += obj.speed[1]
-        if obj.pos[1] + obj.radius < 0:
-            obj.active = False
-        if obj.pos[1] - obj.radius > game.height:
-            obj.active = False
-        if obj.pos[0] + obj.radius < 0:
-            obj.active = False
-        if obj.pos[0] - obj.radius > game.width:
-            obj.active = False
+        game.update_obj_pos(obj)
 
     @staticmethod
     def charge_up(obj, game):

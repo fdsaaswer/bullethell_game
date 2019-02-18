@@ -15,28 +15,34 @@ class Game:
         pygame.init()
         self._surface = pygame.display.set_mode((width, height))
         self._bgr = Background(width, height)
-        self._player = Player(
-            [width/2., height - 100.],
-            [0., 0.]
-        )
-        self.effects = []  # e.g. bullets, explosions, power-ups, etc
-        self.units = [self._player]  # 'physical' objects, e.g. can collide
-        self.width = width
-        self.height = height
-
-    def _spawn(self, obj, chance):
-        if random() >= chance:
-            return
-        if not utils.colliding_objects(obj, self):
-            self.units.append(obj)
+        self._player = Player([width/2., height - 100.], [0., 0.])
+        self._effects = []  # e.g. bullets, explosions, power-ups, etc
+        self._units = [self._player]  # 'physical' objects, e.g. can collide
+        self._width = width
+        self._height = height
 
     @property
     def player_pos(self):
         return self._player.pos
 
+    def add_unit(self, obj):
+        self._units.append(obj)
+
+    def add_effect(self, obj):
+        self._effects.append(obj)
+
+    def get_units(self, obj, radius, function): # get units in radius matching condition
+        if radius == 0.:
+            return [o for o in self._units if o.active and o != obj and function(obj, o)]
+        else:
+            return [o for o in self._units if o.active and utils.dist(o.pos, obj.pos) < radius and o != obj and function(obj, o)]
+
+    def get_colliding_units(self, obj):
+        return self.get_units(obj, 0., lambda obj, o: utils.dist(obj.pos, o.pos) < obj.radius + o.radius)
+
     def update(self):
         self._bgr.update()
-        for objects in [self.effects, self.units]:
+        for objects in [self._effects, self._units]:
             print(len(objects))
             for i in range(len(objects) - 1, -1, -1):
                 obj = objects[i]
@@ -47,18 +53,35 @@ class Game:
                     del objects[i]
 
         # Not essential:
-        self._spawn(Target(
-                [random() * self.width, 0.],
+        def _spawn(game, obj, chance):
+            if random() >= chance:
+                return
+            if not game.get_colliding_units(obj):
+                game.add_unit(obj)
+        _spawn(self, Target(
+                [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
             ), 0.02)
-        self._spawn(DefendedTarget(
-                [random() * self.width, 0.],
+        _spawn(self, DefendedTarget(
+                [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
             ), 0.002)
 
+    def update_obj_pos(self, obj):
+        obj.pos[0] += obj.speed[0]
+        obj.pos[1] += obj.speed[1]
+        if obj.pos[1] + obj.radius < 0:
+            obj.active = False
+        if obj.pos[1] - obj.radius > self._height:
+            obj.active = False
+        if obj.pos[0] + obj.radius < 0:
+            obj.active = False
+        if obj.pos[0] - obj.radius > self._width:
+            obj.active = False
+
     def draw(self):
         self._bgr.draw(self._surface)
-        for obj in self.units + self.effects:
+        for obj in self._units + self._effects:
             obj.draw(self._surface)
         pygame.display.flip()
 

@@ -10,7 +10,7 @@ class Bullet(Object):
     def position_shift(obj, game):
         super(Bullet, Bullet).position_shift(obj, game)
         if obj.charge >= 1.:
-            for to_hit in utils.colliding_objects(obj, game):
+            for to_hit in game.get_colliding_units(obj):
                 for func in obj.on_hit:
                     func(obj, game)
                 for func in to_hit.on_get_hit:

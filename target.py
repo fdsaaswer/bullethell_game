@@ -12,7 +12,7 @@ class Target(Unit):
     @staticmethod
     @utils.with_chance(0.001)
     def spawn(obj, game):
-        game.effects.append(Bullet(
+        game.add_effect(Bullet(
             obj.pos.copy(),
             [(random() - 0.5) * 2., 1. + random() * 1.]
         ))

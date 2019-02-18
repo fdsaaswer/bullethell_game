@@ -23,7 +23,7 @@ class DefendedTarget(Target):
                   game.player_pos[1] - obj.pos[1]]
         angle = utils.cartesian2polar(vector)[1]
         for i in range(5):
-            game.effects.append(Bullet(
+            game.add_effect(Bullet(
                 obj.pos.copy(),
                 utils.polar2cartesian([3., angle + (math.pi/30.)*(i - 2)])
              ))
@@ -33,8 +33,7 @@ class DefendedTarget(Target):
 
         @utils.with_chance(0.01)
         def add_defender(obj, game):
-            target_units = utils.units_in_radius_matching_condition(obj, game, self.DEFENDER_MAX_DISTANCE,
-                                                                    lambda x: True if isinstance(x, Target) else False)
+            target_units = game.get_units(obj, self.DEFENDER_MAX_DISTANCE, lambda _, x: isinstance(x, Target))
             if target_units:
                 obj.defenders.append(choice(target_units))
 

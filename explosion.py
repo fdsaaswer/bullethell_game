@@ -23,7 +23,7 @@ class Explosion(Object):
             except AttributeError:
                 obj.already_hit = set()
 
-            for to_hit in utils.colliding_objects(obj, game):
+            for to_hit in game.get_colliding_units(obj):
                 if to_hit in obj.already_hit:
                     continue
                 obj.already_hit.add(to_hit)
