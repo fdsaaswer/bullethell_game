@@ -103,7 +103,8 @@ class Game:
             pygame.K_LEFT: Action.MOVE_LEFT,
             pygame.K_RIGHT: Action.MOVE_RIGHT,
             pygame.K_UP: Action.MOVE_UP,
-            pygame.K_DOWN: Action.MOVE_DOWN
+            pygame.K_DOWN: Action.MOVE_DOWN,
+            pygame.K_LSHIFT: Action.SHIFT
         }
 
         if event.type == pygame.KEYDOWN:

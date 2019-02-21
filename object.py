@@ -1,5 +1,6 @@
 import math
 
+
 class Object:
 
     @staticmethod
@@ -13,8 +14,8 @@ class Object:
 
     @staticmethod
     def charge_up(obj, game):
-        if obj.charge < 1. and obj.charge_speed > 0.:
-            obj.charge += obj.charge_speed
+        if obj.charge_speed:
+            obj.charge = max(0., min(1., obj.charge + obj.charge_speed))
 
     def __init__(self, pos, speed, radius):
         if len(pos) != len(speed):
