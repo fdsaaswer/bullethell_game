@@ -43,18 +43,17 @@ class DestroyerTarget(Target):
         super().__init__(pos, speed, 15.)
         self.charge_speed = 0.002
 
-
     def draw(self, surface):
         super().draw(surface)
-        N = 50
-        for i in range(N):
-            phi = random() * 2 * math.pi
-            vector1 = utils.polar2cartesian([self.radius + 1. + random() * 5.0, phi])
-            pos1 = [int(vector1[0] + self.pos[0]),
-                    int(vector1[1] + self.pos[1])]
-            vector2 = utils.polar2cartesian([self.radius + 1., phi])
-            pos2 = [int(vector2[0] + self.pos[0]),
-                    int(vector2[1] + self.pos[1])]
-            pygame.draw.line(surface, (0. if self.charge < 0.7 else 255., 0., 0.), pos1, pos2)
+        if self.charge >= 0.7:
+            for _ in range(50):
+                phi = random() * 2 * math.pi
+                vector1 = utils.polar2cartesian([self.radius + 6. + random() * 6.0, phi])
+                pos1 = [int(round(vector1[0] + self.pos[0] - 1.)),
+                        int(round(vector1[1] + self.pos[1] - 1.))]
+                vector2 = utils.polar2cartesian([self.radius + 5., phi])
+                pos2 = [int(round(vector2[0] + self.pos[0] - 1.)),
+                        int(round(vector2[1] + self.pos[1] - 1.))]
+                pygame.draw.line(surface, (255., 0., 0.), pos2, pos1)
 
 
