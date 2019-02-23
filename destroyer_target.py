@@ -31,8 +31,8 @@ class DestroyerTarget(Target):
             obj.charge = 0.
         if obj.charge < 0.7:
             return
-        vector = [game.player_pos[0] - obj.pos[0],
-                  game.player_pos[1] - obj.pos[1]]
+        vector = [game.get_player().pos[0] - obj.pos[0],
+                  game.get_player().pos[1] - obj.pos[1]]
         angle = utils.cartesian2polar(vector)[1]
         bullet = Bullet(
             obj.pos.copy(),
@@ -44,6 +44,7 @@ class DestroyerTarget(Target):
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)
         self.charge_speed = 0.002
+        self.score_cost = 10
 
     def draw(self, surface):
         super().draw(surface)
@@ -51,11 +52,11 @@ class DestroyerTarget(Target):
             for _ in range(50):
                 phi = random() * 2 * math.pi
                 vector1 = utils.polar2cartesian([self.radius + 6. + random() * 6.0, phi])
-                pos1 = [int(round(vector1[0] + self.pos[0] - 1.)),
-                        int(round(vector1[1] + self.pos[1] - 1.))]
+                pos1 = [round(vector1[0] + self.pos[0] - 1.),
+                        round(vector1[1] + self.pos[1] - 1.)]
                 vector2 = utils.polar2cartesian([self.radius + 5., phi])
-                pos2 = [int(round(vector2[0] + self.pos[0] - 1.)),
-                        int(round(vector2[1] + self.pos[1] - 1.))]
+                pos2 = [round(vector2[0] + self.pos[0] - 1.),
+                        round(vector2[1] + self.pos[1] - 1.)]
                 pygame.draw.line(surface, (255., 0., 0.), pos2, pos1)
 
 

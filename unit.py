@@ -1,8 +1,9 @@
 import utils
 
+from random import random
 from object import Object
 from explosion import Explosion
-
+from pickup import PickUp
 
 class Unit(Object):
 
@@ -23,6 +24,8 @@ class Unit(Object):
         if obj.hp < 1.:
             obj.active = False
             game.add_effect(Explosion(obj.pos.copy(), None, 1.0))
+            if random() < 0.1 * obj.score_cost:
+                game.add_effect(PickUp(obj.pos.copy()))
             if source.source:
                 for func in source.source.on_kill:
                     func(obj, game)

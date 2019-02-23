@@ -18,8 +18,8 @@ class DefendedTarget(Target):
     @staticmethod
     @utils.with_chance(0.001)
     def spawn(obj, game):
-        vector = [game.player_pos[0] - obj.pos[0],
-                  game.player_pos[1] - obj.pos[1]]
+        vector = [game.get_player().pos[0] - obj.pos[0],
+                  game.get_player().pos[1] - obj.pos[1]]
         angle = utils.cartesian2polar(vector)[1]
         for i in range(5):
             game.add_effect(Bullet(
@@ -30,6 +30,7 @@ class DefendedTarget(Target):
 
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 25.)
+        self.score_cost = 10
 
         @utils.with_chance(0.01)
         def add_defender(obj, game):

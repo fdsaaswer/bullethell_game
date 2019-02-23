@@ -23,9 +23,8 @@ class Game:
         self._width = width
         self._height = height
 
-    @property
-    def player_pos(self):
-        return self._player.pos
+    def get_player(self):
+        return self._player
 
     def add_unit(self, obj):
         self._units.append(obj)

@@ -16,47 +16,47 @@ class Action(IntEnum):
     SHIFT = 32
 
 
+def process_action(obj, game):
+    obj.charge_speed = -0.002 if obj.action & Action.SHIFT else 0.001
+    if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
+        pass
+    elif obj.action & Action.MOVE_LEFT:
+        obj.speed[0] -= 0.5 if obj.action & Action.SHIFT and obj.charge > 0 else 0.1
+    elif obj.action & Action.MOVE_RIGHT:
+        obj.speed[0] += 0.5 if obj.action & Action.SHIFT and obj.charge > 0 else 0.1
+    if obj.action & Action.MOVE_UP and obj.action & Action.MOVE_DOWN:
+        pass
+    elif obj.action & Action.MOVE_UP:
+        obj.speed[1] -= 0.25 if obj.action & Action.SHIFT and obj.charge > 0 else 0.05
+    elif obj.action & Action.MOVE_DOWN:
+        obj.speed[1] += 0.25 if obj.action & Action.SHIFT and obj.charge > 0 else 0.05
+    if obj.action & Action.ATTACK:
+        obj.action &= ~Action.ATTACK
+        if obj.charge >= 0.1:
+            obj.charge -= 0.1
+            bullet = Bullet(
+                obj.pos.copy(),
+                [0., -3.],
+                obj, obj.damage
+            )
+            bullet.charge_speed *= 3
+            game.add_effect(bullet)
+
+
 class Player(Unit):
 
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)
 
-        def process_action(obj, game):
-            obj.charge_speed = -0.002 if obj.action & Action.SHIFT else 0.001
-            if obj.action & Action.MOVE_LEFT and obj.action & Action.MOVE_RIGHT:
-                pass
-            elif obj.action & Action.MOVE_LEFT:
-                obj.speed[0] -= 0.5 if obj.action & Action.SHIFT and obj.charge > 0 else 0.1
-            elif obj.action & Action.MOVE_RIGHT:
-                obj.speed[0] += 0.5 if obj.action & Action.SHIFT and obj.charge > 0 else 0.1
-            if obj.action & Action.MOVE_UP and obj.action & Action.MOVE_DOWN:
-                pass
-            elif obj.action & Action.MOVE_UP:
-                obj.speed[1] -= 0.25 if obj.action & Action.SHIFT and obj.charge > 0 else 0.05
-            elif obj.action & Action.MOVE_DOWN:
-                obj.speed[1] += 0.25 if obj.action & Action.SHIFT and obj.charge > 0 else 0.05
-            if obj.action & Action.ATTACK:
-                obj.action &= ~Action.ATTACK
-                if obj.charge >= 0.1:
-                    obj.charge -= 0.1
-                    bullet = Bullet(
-                        obj.pos.copy(),
-                        [0., -3.],
-                        obj, obj.damage
-                    )
-                    bullet.charge_speed *= 3
-                    game.add_effect(bullet)
-
-        self.on_update.append(process_action)
-        self.action = Action.NO_ACTION
-
         def player_score(obj, game):
             self.score += obj.score_cost
 
-        self.score = 0
+        self.on_update.append(process_action)
+        self.action = Action.NO_ACTION
         self.on_kill.append(player_score)
         self.hp += 3.
         self.damage = 1.
+        self.score = 0
 
     def draw(self, surface):
         if not self.active:
