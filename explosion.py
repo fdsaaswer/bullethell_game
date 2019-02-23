@@ -8,7 +8,7 @@ class Explosion(Object):
     @staticmethod
     def charge_up(obj, game):
         super(Explosion, Explosion).charge_up(obj, game)
-        obj.radius += 1.1
+        obj.radius += obj.radius_speed
         if obj.charge >= 1.0:
             obj.active = False
             return
@@ -18,12 +18,18 @@ class Explosion(Object):
             if to_hit in obj.already_hit:
                 continue
             obj.already_hit.add(to_hit)
+            if obj.source:
+                for func in obj.source.on_hit:
+                    func(obj, game, to_hit)
             for func in to_hit.on_get_hit:
-                func(to_hit, game)
+                func(to_hit, game, obj)
 
-    def __init__(self, pos):
+    def __init__(self, pos, source, damage):
         super().__init__(pos, [0., 1.], 10.)
         self.charge_speed = 0.01
+        self.radius_speed = 1.1
+        self.source = source
+        self.damage = damage
         self.already_hit = set()
 
     def draw(self, surface):

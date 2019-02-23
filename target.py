@@ -14,7 +14,8 @@ class Target(Unit):
     def spawn(obj, game):
         game.add_effect(Bullet(
             obj.pos.copy(),
-            [(random() - 0.5) * 2., 1. + random() * 1.]
+            [(random() - 0.5) * 2., 1. + random() * 1.],
+            None, 1.
         ))
 
     def __init__(self, pos, speed, radius=15.):

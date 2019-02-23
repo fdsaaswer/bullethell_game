@@ -18,14 +18,20 @@ class Unit(Object):
         obj.colliding_units = temp_colliding_units
 
     @staticmethod
-    def take_damage(obj, game):
-        obj.hp -= 1.
+    def take_damage(obj, game, source):
+        obj.hp -= source.damage
         if obj.hp < 1.:
             obj.active = False
-            game.add_effect(Explosion(obj.pos.copy()))
+            game.add_effect(Explosion(obj.pos.copy(), None, 1.0))
+            if source.source:
+                for func in source.source.on_kill:
+                    func(obj, game)
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.on_hit = []
         self.on_get_hit = [self.take_damage]
-        self.hp = 1.
+        self.on_kill = []
         self.colliding_units = []
+        self.hp = 1.
+        self.score_cost = 1.

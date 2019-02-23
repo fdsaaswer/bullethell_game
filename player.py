@@ -41,20 +41,22 @@ class Player(Unit):
                     obj.charge -= 0.1
                     bullet = Bullet(
                         obj.pos.copy(),
-                        [0., -3.]
+                        [0., -3.],
+                        obj, obj.damage
                     )
                     bullet.charge_speed *= 3
                     game.add_effect(bullet)
 
-                    def player_score(obj, game):
-                        self.score += 1
-
-                    bullet.on_hit.append(player_score)
-
-        self.score = 0
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
+
+        def player_score(obj, game):
+            self.score += obj.score_cost
+
+        self.score = 0
+        self.on_kill.append(player_score)
         self.hp += 3.
+        self.damage = 1.
 
     def draw(self, surface):
         if not self.active:

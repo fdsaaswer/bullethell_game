@@ -11,9 +11,9 @@ class DefendedTarget(Target):
     DEFENDER_MAX_DISTANCE = 150.
 
     @staticmethod
-    def take_damage(obj, game):
+    def take_damage(obj, game, source):
         if not obj.defenders:
-            super(DefendedTarget, DefendedTarget).take_damage(obj, game)
+            super(DefendedTarget, DefendedTarget).take_damage(obj, game, source)
 
     @staticmethod
     @utils.with_chance(0.001)
@@ -24,7 +24,8 @@ class DefendedTarget(Target):
         for i in range(5):
             game.add_effect(Bullet(
                 obj.pos.copy(),
-                utils.polar2cartesian([3., angle + (math.pi/30.)*(i - 2)])
+                utils.polar2cartesian([3., angle + (math.pi/30.)*(i - 2)]),
+                None, 1.
              ))
 
     def __init__(self, pos, speed):

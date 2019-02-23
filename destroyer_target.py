@@ -12,13 +12,14 @@ from target import Target
 class DestroyerTarget(Target):
 
     @staticmethod
-    def take_damage(obj, game):
-        super(DestroyerTarget, DestroyerTarget).take_damage(obj, game)
+    def take_damage(obj, game, source):
+        super(DestroyerTarget, DestroyerTarget).take_damage(obj, game, source)
         if obj.charge < 0.7:
             return
         for i in range(3):
             explosion = Explosion([obj.pos[0] + gauss(0., 20.),
-                                   obj.pos[1] + gauss(0., 20.)])
+                                  obj.pos[1] + gauss(0., 20.)],
+                                  None, 1.)
             explosion.radius += random() * 3.0
             explosion.already_hit.add(obj)
             game.add_effect(explosion)
@@ -35,7 +36,8 @@ class DestroyerTarget(Target):
         angle = utils.cartesian2polar(vector)[1]
         bullet = Bullet(
             obj.pos.copy(),
-            utils.polar2cartesian([3., angle + gauss(0., 1.) * math.pi / 30.])
+            utils.polar2cartesian([3., angle + gauss(0., 1.) * math.pi / 30.]),
+            None, 1.
         )
         game.add_effect(bullet)
 
