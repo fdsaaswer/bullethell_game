@@ -35,14 +35,20 @@ class Game:
     def update_obj_pos(self, obj):
         obj.pos[0] += obj.speed[0]
         obj.pos[1] += obj.speed[1]
+
         if obj.pos[1] + obj.radius < 0.:
             obj.active = False
+
+        if isinstance(obj, Player) and obj.pos[1] + obj.radius > self._height:
+            utils.collide(obj, [obj.pos[0], self._height])
         if obj.pos[1] - obj.radius > self._height:
             obj.active = False
+
         if isinstance(obj, Unit) and obj.pos[0] - obj.radius < 0.:
             utils.collide(obj, [0., obj.pos[1]])
         if obj.pos[0] + obj.radius < 0.:
             obj.active = False
+
         if isinstance(obj, Unit) and obj.pos[0] + obj.radius > self._width:
             utils.collide(obj, [self._width, obj.pos[1]])
         if obj.pos[0] - obj.radius > self._width:
@@ -67,7 +73,7 @@ class Game:
                     for func in obj.on_update:
                         func(obj, self)
                 if not obj.active:  # can be updated during function execution
-                    del objects[i]
+                    del objects[i] # TODO: improve complexity
         if not self._player.active:
             exit(0)
 
@@ -107,6 +113,7 @@ class Game:
         }
 
         if event.type == pygame.KEYDOWN:
+
             if event.key == pygame.K_ESCAPE:
                 exit(0)
             try:

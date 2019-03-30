@@ -44,3 +44,10 @@ def collide(obj, anchor):  # modifies obj.speed
         speed[1] = 2. * approach[1] + math.pi - speed[1]
         speed[0] *= 0.8
     obj.speed = polar2cartesian(speed)
+
+
+def shift_to(value, target, step):
+    if value < target:
+        return max(value + step, target)
+    else:
+        return min(value - step, target)

@@ -15,14 +15,14 @@ class Explosion(Object):
         if obj.charge >= 0.75:  # black is safe
             return
         for to_hit in game.get_colliding_units(obj):
-            if to_hit in obj.already_hit:
+            if to_hit == obj.source or to_hit in obj.already_hit:
                 continue
-            obj.already_hit.add(to_hit)
             if obj.source:
                 for func in obj.source.on_hit:
-                    func(obj, game, to_hit)
+                    func(obj.source, game, to_hit)
             for func in to_hit.on_get_hit:
                 func(to_hit, game, obj)
+            obj.already_hit.add(to_hit)
 
     def __init__(self, pos, source, damage):
         super().__init__(pos, [0., 1.], 10.)

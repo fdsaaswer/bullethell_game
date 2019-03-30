@@ -25,7 +25,9 @@ class Unit(Object):
             obj.active = False
             game.add_effect(Explosion(obj.pos.copy(), None, 1.0))
             if random() < 0.1 * obj.score_cost:
-                game.add_effect(PickUp(obj.pos.copy()))
+                pickup = PickUp(obj.pos.copy())
+                pickup.target = game.get_player()
+                game.add_effect(pickup)
             if source.source:
                 for func in source.source.on_kill:
                     func(obj, game)

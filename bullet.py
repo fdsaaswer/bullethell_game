@@ -10,12 +10,14 @@ class Bullet(Object):
         super(Bullet, Bullet).position_shift(obj, game)
         if obj.charge >= 1.:
             for to_hit in game.get_colliding_units(obj):
-                obj.active = False
+                if to_hit == obj.source:
+                    continue
                 if obj.source:
                     for func in obj.source.on_hit:
-                        func(obj, game, to_hit)
+                        func(obj.source, game, to_hit)
                 for func in to_hit.on_get_hit:
                     func(to_hit, game, obj)
+                obj.active = False
 
     def __init__(self, pos, speed, source, damage):
         super().__init__(pos, speed, 5.)

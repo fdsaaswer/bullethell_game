@@ -28,7 +28,9 @@ class Target(Unit):
         if not self.active:
             return
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, (255, 255, 255), draw_pos, int(self.radius), 0)
+        pygame.draw.circle(surface, [255] * 3, draw_pos, int(self.radius), 0)
         for i in range(int(self.hp)):
-            pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius) - 2*i, 1)
+            pygame.draw.circle(surface, [0] * 3, draw_pos, int(self.radius) - 2*i, 1)
+        if self.hp % 1 > 0.1:
+            pygame.draw.circle(surface, [255. - 155.*(self.hp % 1.)] * 3, draw_pos, int(self.radius) - 2*(i+1), 1)
 

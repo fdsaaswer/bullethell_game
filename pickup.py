@@ -1,24 +1,33 @@
 import pygame
 
 from random import random
+from random import choice
 from object import Object
+import modifier
 import utils
+
 
 class PickUp(Object):
 
     @staticmethod
-    def position_shift(obj, game):
+    def position_shift(obj, game): # consider moving this logic to Player class
         super(PickUp, PickUp).position_shift(obj, game)
         player = game.get_player()
         if utils.dist(player.pos, obj.pos) < obj.radius:
-            player.hp += 3.
+            player.hp += obj.healing
             player.score += 3.
+            new_modifier = choice([
+                modifier.SplashAttack,
+                modifier.TripleAttack,
+                modifier.ActiveDefense
+            ])()
+            new_modifier.apply(player, game)
+            player.modifiers.append(new_modifier)
             obj.active = False
-        else:
-            obj.speed[0] = 1. if obj.pos[0] < player.pos[0] else -1.
 
     def __init__(self, pos):
-        super().__init__(pos, [0., 2.], 15.)
+        self.healing = int(30.*random()) / 10.
+        super().__init__(pos, [0., 2.], 12. + self.healing)
 
     def draw(self, surface):
         if not self.active:
@@ -26,4 +35,4 @@ class PickUp(Object):
         draw_pos = (round(self.pos[0]), round(self.pos[1]))
         pygame.draw.circle(surface, (0., 0., 255.), draw_pos, int(self.radius), 1)
         for i in range(3):
-            pygame.draw.circle(surface, (0., 0., 255.), draw_pos, int(3. + random()*(self.radius - 3.)), 1)
+            pygame.draw.circle(surface, (0., 0., 255.), draw_pos, int(5. + random()*(self.radius - 5.)), 1)

@@ -3,6 +3,7 @@ from enum import IntEnum
 import pygame
 
 from bullet import Bullet
+from explosion import Explosion
 from unit import Unit
 
 
@@ -41,6 +42,8 @@ def process_action(obj, game):
             )
             bullet.charge_speed *= 3
             game.add_effect(bullet)
+            for func in obj.on_shoot:
+                func(obj, game, bullet)
 
 
 class Player(Unit):
@@ -51,11 +54,26 @@ class Player(Unit):
         def player_score(obj, game):
             self.score += obj.score_cost
 
+        def player_damaged(obj, game, source):
+            game.add_effect(Explosion(obj.pos.copy(), obj, source.damage))
+
+        def process_modifiers(obj, game):
+            def process_modifier(o):
+                o.duration -= 1
+                if o.duration == 0:
+                    o.detach(obj, game)
+                return o
+            obj.modifiers = [process_modifier(o) for o in obj.modifiers if o.duration > 0]
+
+        self.on_shoot = []
+        self.modifiers = []
+        self.on_update.append(process_modifiers)
+        self.on_get_hit.append(player_damaged)
+        self.on_kill.append(player_score)
         self.on_update.append(process_action)
         self.action = Action.NO_ACTION
-        self.on_kill.append(player_score)
         self.hp += 3.
-        self.damage = 1.
+        self.damage = 0.4
         self.score = 0
 
     def draw(self, surface):

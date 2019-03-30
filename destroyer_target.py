@@ -16,12 +16,11 @@ class DestroyerTarget(Target):
         super(DestroyerTarget, DestroyerTarget).take_damage(obj, game, source)
         if obj.charge < 0.7:
             return
-        for i in range(3):
+        for _ in range(3):
             explosion = Explosion([obj.pos[0] + gauss(0., 20.),
                                   obj.pos[1] + gauss(0., 20.)],
-                                  None, 1.)
+                                  obj, 1.)
             explosion.radius += random() * 3.0
-            explosion.already_hit.add(obj)
             game.add_effect(explosion)
 
     @staticmethod
