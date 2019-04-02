@@ -52,3 +52,7 @@ class Unit(Object):
         self.colliding_units = []
         self.hp = 1.
         self.score_cost = 1.
+
+    def draw(self, surface):
+        for o in self.modifiers:
+            o.draw(self, surface)

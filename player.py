@@ -66,8 +66,7 @@ class Player(Unit):
         self.score = 0
 
     def draw(self, surface):
-        if not self.active:
-            return
+        super().draw(surface)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 0)
         pygame.draw.circle(surface,

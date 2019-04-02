@@ -25,8 +25,7 @@ class Target(Unit):
         self.on_update.append(self.spawn)
 
     def draw(self, surface):
-        if not self.active:
-            return
+        super().draw(surface)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, [255] * 3, draw_pos, int(self.radius), 0)
         for i in range(int(self.hp)):

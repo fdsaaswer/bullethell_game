@@ -29,6 +29,9 @@ class BaseModifier:
     def detach(self, obj, game):
         pass
 
+    def draw(self, obj, surface):
+        pass
+
 
 class TripleAttack(BaseModifier):
 
