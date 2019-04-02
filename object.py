@@ -15,7 +15,7 @@ class Object:
             vector = [obj.target.pos[0] - obj.pos[0],
                       obj.target.pos[1] - obj.pos[1]]
             angle_target = utils.cartesian2polar(vector)[1]
-            if obj.anchor:
+            if utils.dist(obj.pos, obj.target.pos) < obj.anchor_radius:
                 angle_target += 0.5*math.pi
             obj_speed_polar = utils.cartesian2polar(obj.speed)
             obj_speed_polar[1] = utils.shift_to(obj_speed_polar[1], angle_target, 0.01)
@@ -34,7 +34,7 @@ class Object:
         self.pos = pos
         self.speed = speed
         self.target = None
-        self.anchor = False
+        self.anchor_radius = 0.
         self.radius = radius
         self.active = True
         self.charge = 0.

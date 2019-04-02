@@ -35,9 +35,7 @@ class Unit(Object):
     @staticmethod
     def process_modifiers(obj, game):
         def process_modifier(o):
-            o.update(obj, game)
-            if not o.is_active:
-                o.detach(obj, game)
+            o.update()
             return o
         obj.modifiers = [process_modifier(o) for o in obj.modifiers if o.is_active]
 
