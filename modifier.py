@@ -7,7 +7,30 @@ from explosion import Explosion
 import utils
 
 
-class TripleAttack:
+class BaseModifier:
+    def __init__(self, duration):
+        self.is_active = True
+        if duration:
+            self._duration = duration
+            self._is_permanent = False
+        else:
+            self._is_permanent = True
+
+    def update(self, obj, game):
+        if self._is_permanent:
+            pass
+        self._duration -= 1
+        if self._duration == 0:
+            self.is_active = False
+
+    def apply(self, obj, game):
+        pass
+
+    def detach(self, obj, game):
+        pass
+
+
+class TripleAttack(BaseModifier):
 
     @staticmethod
     def triple_attack(obj, game, bullet):
@@ -18,7 +41,7 @@ class TripleAttack:
             game.add_effect(bullet_new)
 
     def __init__(self):
-        self.duration = 1000
+        super().__init__(1000)
         self.effect = self.triple_attack
 
     def apply(self, obj, game):
@@ -28,9 +51,9 @@ class TripleAttack:
         obj.on_shoot.remove(self.effect)
 
 
-class ActiveDefense:
+class ActiveDefense(BaseModifier):
     def __init__(self):
-        self.duration = 500
+        super().__init__(500)
         self.bullets = []
 
     def apply(self, obj, game):
@@ -53,7 +76,7 @@ class ActiveDefense:
             bullet.active = False
 
 
-class SplashAttack:
+class SplashAttack(BaseModifier):
 
     @staticmethod
     def splash_attack(obj, game, target):
@@ -63,7 +86,7 @@ class SplashAttack:
         game.add_effect(explosion)
 
     def __init__(self):
-        self.duration = 1000
+        super().__init__(1000)
         self.effect = self.splash_attack
 
     def apply(self, obj, game):
@@ -71,3 +94,6 @@ class SplashAttack:
 
     def detach(self, obj, game):
         obj.on_hit.remove(self.effect)
+
+
+PLAYER_MODIFIERS = [TripleAttack, ActiveDefense, SplashAttack]

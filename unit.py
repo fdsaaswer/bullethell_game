@@ -32,8 +32,20 @@ class Unit(Object):
                 for func in source.source.on_kill:
                     func(obj, game)
 
+    @staticmethod
+    def process_modifiers(obj, game):
+        def process_modifier(o):
+            o.update(obj, game)
+            if not o.is_active:
+                o.detach(obj, game)
+            return o
+        obj.modifiers = [process_modifier(o) for o in obj.modifiers if o.is_active]
+
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.on_shoot = []
+        self.modifiers = []
+        self.on_update.append(self.process_modifiers)
         self.on_hit = []
         self.on_get_hit = [self.take_damage]
         self.on_kill = []
