@@ -99,7 +99,8 @@ class Game:
     def draw(self):
         self._bgr.draw(self._surface)
         for obj in self._units + self._effects:
-            obj.draw(self._surface)
+            if obj.active:
+                obj.draw(self, self._surface)
         pygame.display.flip()
 
     def process_event(self, event):

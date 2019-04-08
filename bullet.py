@@ -25,9 +25,11 @@ class Bullet(Object):
         self.source = source
         self.damage = damage
 
-    def draw(self, surface):
-        if not self.active:
-            return
-        color = (self.charge * 150. if self.charge < 1. else 255., 0., 0.)
+    def draw(self, game, surface):
+        color_intensity = 150.*self.charge if self.charge < 1. else 255.
+        if self.source == game.get_player():
+            color = (0., 0., color_intensity)
+        else:
+            color = (color_intensity, 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0)

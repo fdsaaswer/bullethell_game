@@ -45,8 +45,8 @@ class DefendedTarget(Target):
         self.defenders = []
         self.on_update.extend([add_defender, del_defender])
 
-    def draw(self, surface):
-        super().draw(surface)
+    def draw(self, game, surface):
+        super().draw(game, surface)
         N = 50
         for o in self.defenders:
             for i in range(N):

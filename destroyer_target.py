@@ -45,8 +45,8 @@ class DestroyerTarget(Target):
         self.charge_speed = 0.002
         self.score_cost = 10
 
-    def draw(self, surface):
-        super().draw(surface)
+    def draw(self, game, surface):
+        super().draw(game, surface)
         if self.charge >= 0.7:
             for _ in range(50):
                 phi = random() * 2 * math.pi

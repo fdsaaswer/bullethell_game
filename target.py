@@ -24,8 +24,8 @@ class Target(Unit):
         if random() < 0.5: self.hp += 1.
         self.on_update.append(self.spawn)
 
-    def draw(self, surface):
-        super().draw(surface)
+    def draw(self, game, surface):
+        super().draw(game, surface)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, [255] * 3, draw_pos, int(self.radius), 0)
         for i in range(int(self.hp)):
