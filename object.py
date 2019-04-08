@@ -36,7 +36,7 @@ class Object:
         self.target = None
         self.anchor_radius = 0.
         self.radius = radius
-        self.active = True
+        self.is_active = True
         self.charge = 0.
         self.charge_speed = 0.
         self.on_update = []

@@ -25,7 +25,7 @@ class DestroyerTarget(Target):
 
     @staticmethod
     @utils.with_chance(0.08)
-    def spawn(obj, game):
+    def shoot(obj, game):
         if obj.charge >= 1:
             obj.charge = 0.
         if obj.charge < 0.7:

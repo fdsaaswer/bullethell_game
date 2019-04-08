@@ -22,7 +22,7 @@ class Unit(Object):
     def take_damage(obj, game, source):
         obj.hp -= source.damage
         if obj.hp < 1.:
-            obj.active = False
+            obj.is_active = False
             game.add_effect(Explosion(obj.pos.copy(), None, 1.0))
             if random() < 0.1 * obj.score_cost:
                 pickup = PickUp(obj.pos.copy())
@@ -32,18 +32,10 @@ class Unit(Object):
                 for func in source.source.on_kill:
                     func(obj, game)
 
-    @staticmethod
-    def process_modifiers(obj, game):
-        def process_modifier(o):
-            o.update()
-            return o
-        obj.modifiers = [process_modifier(o) for o in obj.modifiers if o.is_active]
-
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
         self.on_shoot = []
         self.modifiers = []
-        self.on_update.append(self.process_modifiers)
         self.on_hit = []
         self.on_get_hit = [self.take_damage]
         self.on_kill = []
@@ -52,5 +44,4 @@ class Unit(Object):
         self.score_cost = 1.
 
     def draw(self, game, surface):
-        for o in self.modifiers:
-            o.draw(self, surface)
+        pass

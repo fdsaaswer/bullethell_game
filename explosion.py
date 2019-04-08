@@ -10,7 +10,7 @@ class Explosion(Object):
         super(Explosion, Explosion).charge_up(obj, game)
         obj.radius += obj.radius_speed
         if obj.charge >= 1.0:
-            obj.active = False
+            obj.is_active = False
             return
         if obj.charge >= 0.75:  # black is safe
             return

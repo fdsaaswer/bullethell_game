@@ -20,10 +20,9 @@ class PickUp(Object):
                 modifier.SplashAttack,
                 modifier.TripleAttack,
                 modifier.ActiveDefense
-            ])()
-            new_modifier.apply(player, game)
-            player.modifiers.append(new_modifier)
-            obj.active = False
+            ])(player)
+            game.add_effect(new_modifier)
+            obj.is_active = False
 
     def __init__(self, pos):
         self.healing = int(30.*random()) / 10.

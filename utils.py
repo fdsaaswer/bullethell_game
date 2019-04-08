@@ -14,6 +14,12 @@ class with_chance:
         return wrapped_f
 
 
+def normalize(vector):
+    a = vector[0]
+    b = vector[1]
+    norm = math.sqrt(a * a + b * b)
+    return [a/norm, b/norm]
+
 def dist(pos_1, pos_2):
     a = pos_1[0] - pos_2[0]
     b = pos_1[1] - pos_2[1]

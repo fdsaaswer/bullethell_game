@@ -10,6 +10,7 @@ from player import Player
 from player import Action
 from background import Background
 import utils
+import modifier
 
 
 class Game:
@@ -37,44 +38,41 @@ class Game:
         obj.pos[1] += obj.speed[1]
 
         if obj.pos[1] + obj.radius < 0.:
-            obj.active = False
+            obj.is_active = False
 
         if isinstance(obj, Player) and obj.pos[1] + obj.radius > self._height:
             utils.collide(obj, [obj.pos[0], self._height])
         if obj.pos[1] - obj.radius > self._height:
-            obj.active = False
+            obj.is_active = False
 
         if isinstance(obj, Unit) and obj.pos[0] - obj.radius < 0.:
             utils.collide(obj, [0., obj.pos[1]])
         if obj.pos[0] + obj.radius < 0.:
-            obj.active = False
+            obj.is_active = False
 
         if isinstance(obj, Unit) and obj.pos[0] + obj.radius > self._width:
             utils.collide(obj, [self._width, obj.pos[1]])
         if obj.pos[0] - obj.radius > self._width:
-            obj.active = False
+            obj.is_active = False
 
     def get_units(self, obj, radius, function): # get units in radius matching condition
         if radius == 0.:
-            return [o for o in self._units if o.active and o != obj and function(obj, o)]
+            return [o for o in self._units if o.is_active and o != obj and function(obj, o)]
         else:
-            return [o for o in self._units if o.active and utils.dist(o.pos, obj.pos) < radius and o != obj and function(obj, o)]
+            return [o for o in self._units if o.is_active and utils.dist(o.pos, obj.pos) < radius and o != obj and function(obj, o)]
 
     def get_colliding_units(self, obj):
         return self.get_units(obj, 0., lambda obj, o: utils.dist(obj.pos, o.pos) < obj.radius + o.radius)
 
     def update(self):
         self._bgr.update()
-        for objects in [self._effects, self._units]:
-            print(len(objects))
-            for i in range(len(objects) - 1, -1, -1):
-                obj = objects[i]
-                if obj.active:
-                    for func in obj.on_update:
-                        func(obj, self)
-                if not obj.active:  # can be updated during function execution
-                    del objects[i] # TODO: improve complexity
-        if not self._player.active:
+        for obj in self._effects + self._units:
+            if obj.is_active:
+                for func in obj.on_update:
+                    func(obj, self)
+        self._effects = [obj for obj in self._effects if obj.is_active]
+        self._units = [obj for obj in self._units if obj.is_active]
+        if not self._player.is_active:
             exit(0)
 
         # Not essential:
@@ -83,6 +81,9 @@ class Game:
                 return
             if not game.get_colliding_units(obj):
                 game.add_unit(obj)
+            if isinstance(obj, DefendedTarget):
+                game.add_effect(modifier.SpreadShot(obj, 5, 15.))
+                game.add_effect(modifier.ShootAt(obj, game.get_player()))
         _spawn(self, Target(
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
@@ -99,7 +100,7 @@ class Game:
     def draw(self):
         self._bgr.draw(self._surface)
         for obj in self._units + self._effects:
-            if obj.active:
+            if obj.is_active:
                 obj.draw(self, self._surface)
         pygame.display.flip()
 

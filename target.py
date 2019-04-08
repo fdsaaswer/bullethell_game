@@ -5,24 +5,31 @@ import pygame
 import utils
 from bullet import Bullet
 from unit import Unit
-
+import modifier
 
 class Target(Unit):
 
     @staticmethod
-    @utils.with_chance(0.001)
-    def spawn(obj, game):
-        game.add_effect(Bullet(
+    def shoot(obj, game):
+        if obj.charge < 1.:
+            return
+        obj.charge = 0.
+        bullet = Bullet(
             obj.pos.copy(),
             [(random() - 0.5) * 2., 1. + random() * 1.],
             None, 1.
-        ))
+        )
+        game.add_effect(bullet)
+        for func in obj.on_shoot:
+            func(obj, game, bullet)
+
 
     def __init__(self, pos, speed, radius=15.):
         super().__init__(pos, speed, radius)
         if random() < 0.5: self.hp += 1.
         if random() < 0.5: self.hp += 1.
-        self.on_update.append(self.spawn)
+        self.on_update.append(self.shoot)
+        self.charge_speed = 0.005 * random()
 
     def draw(self, game, surface):
         super().draw(game, surface)
