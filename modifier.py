@@ -9,22 +9,26 @@ import utils
 
 class BaseModifier:
 
+    @staticmethod
+    def process(self, game):
+        if not self._holder.is_active:
+            self.is_active = False
+        if not self._is_permanent:
+            self._duration -= 1
+            if self._duration == 0:
+                self.is_active = False
+        if not self.is_active:
+            self.detach()
+
     def __init__(self, holder, duration):
         self._holder = holder
         self.is_active = True
-        self.on_update = []
         if duration:
-            def process_duration(obj, game):
-                obj.duration -= 1
-                if obj.duration == 0:
-                    obj.is_active = False
-                if not obj.is_active:
-                    obj.detach()
-            self.on_update.append(process_duration)
-            self.duration = duration
-            self.is_permanent = False
+            self._duration = duration
+            self._is_permanent = False
         else:
-            self.is_permanent = True
+            self._is_permanent = True
+        self.on_update = [self.process]
 
     def detach(self):
         pass
@@ -54,23 +58,30 @@ class TripleAttack(BaseModifier):
 
 
 class ActiveDefense(BaseModifier):
+
+    @staticmethod
+    def spawn_bullet(self, game):
+        if self._spawn_countdown == 0:
+            self._spawn_countdown = self._spawn_period
+            self._bullets = [o for o in self._bullets if o.is_active]
+            if len(self._bullets) == self._max_bullets:
+                return
+            bullet = Bullet(self._holder.pos.copy(), [0., 3.], self._holder, 1.5)
+            bullet.target = self._holder
+            bullet.anchor_radius = 100. * random() + 100.
+            game.add_effect(bullet)
+            self._bullets.append(bullet)
+            self._game.append(game)
+        self._spawn_countdown -= 1
+
     def __init__(self, holder):
         super().__init__(holder, 1500)
         self._bullets = []
         self._game = []
         self._max_bullets = 5
         self._spawn_period = 100
-
-        def spawn_bullet(obj, game):
-            obj._bullets = [o for o in obj._bullets if o.is_active]
-            if obj.duration % obj._spawn_period == 0 and len(obj._bullets) < obj._max_bullets:
-                bullet = Bullet(obj._holder.pos.copy(), [0., 3.], obj._holder, 1.5)
-                bullet.target = obj._holder
-                bullet.anchor_radius = 100.*random() + 100.
-                game.add_effect(bullet)
-                obj._bullets.append(bullet)
-                obj._game.append(game)
-        self.on_update.append(spawn_bullet)
+        self._spawn_countdown = 0
+        self.on_update.append(self.spawn_bullet)
 
     def detach(self):
         for bullet, game in zip(self._bullets, self._game):
@@ -100,15 +111,15 @@ class SplashAttack(BaseModifier):
 class ShootAt(BaseModifier):
 
     def __init__(self, holder, target):
-        super().__init__(holder, 150)
+        super().__init__(holder, 0)
         self._target = target
 
         def shoot_at(obj, game, bullet):
-            speed = utils.cartesian2polar(bullet.speed)
+            ro = utils.cartesian2polar(bullet.speed)[0]
             vector = [self._target.pos[0] - obj.pos[0],
                       self._target.pos[1] - obj.pos[1]]
-            speed[1] = utils.cartesian2polar(vector)[1]
-            bullet.speed = speed
+            phi = utils.cartesian2polar(vector)[1]
+            bullet.speed = utils.polar2cartesian([ro, phi])
         self._effect = shoot_at
         self._holder.on_shoot.append(self._effect)
 
@@ -141,7 +152,7 @@ class SpreadShot(BaseModifier):
         def spread_shot(obj, game, bullet):
             ro, phi = utils.cartesian2polar(bullet.speed)
             for i in range(self._count):
-                angle = phi - self._spread + 2*self._spread*i/(self._count-1)
+                angle = phi - self._spread + 2.*self._spread*i/(self._count-1.)
                 bullet_new = copy.copy(bullet)
                 bullet_new.pos = bullet.pos.copy()
                 bullet_new.speed = utils.polar2cartesian([ro, angle])
