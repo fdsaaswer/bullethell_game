@@ -72,6 +72,7 @@ class Game:
                     func(obj, self)
         self._effects = [obj for obj in self._effects if obj.is_active]
         self._units = [obj for obj in self._units if obj.is_active]
+        print(len(self._effects), len(self._units))
         if not self._player.is_active:
             exit(0)
 
@@ -81,9 +82,9 @@ class Game:
                 return
             if not game.get_colliding_units(obj):
                 game.add_unit(obj)
-            if isinstance(obj, DefendedTarget):
-                game.add_effect(modifier.SpreadShot(obj, 5, 15.))
-                game.add_effect(modifier.ShootAt(obj, game.get_player()))
+                if isinstance(obj, DefendedTarget):
+                    game.add_effect(modifier.SpreadShot(obj, 5, 15.))
+                    game.add_effect(modifier.ShootAt(obj, game.get_player()))
         _spawn(self, Target(
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
