@@ -1,9 +1,7 @@
 import pygame
 
 from random import random
-from random import choice
 from object import Object
-import modifier
 import utils
 
 
@@ -14,14 +12,8 @@ class PickUp(Object):
         super(PickUp, PickUp).position_shift(obj, game)
         player = game.get_player()
         if utils.dist(player.pos, obj.pos) < obj.radius:
+            game.player_powerup()
             player.hp += obj.healing
-            player.score += 3.
-            new_modifier = choice([
-                modifier.FlakShot,
-                modifier.SpreadShot,
-                modifier.ActiveDefense
-            ])(player, 1000)
-            game.add_effect(new_modifier)
             obj.is_active = False
 
     def __init__(self, pos):

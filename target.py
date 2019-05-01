@@ -5,7 +5,6 @@ import pygame
 import utils
 from bullet import Bullet
 from unit import Unit
-import modifier
 
 class Target(Unit):
 

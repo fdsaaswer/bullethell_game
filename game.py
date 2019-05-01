@@ -4,14 +4,12 @@ from random import random
 
 from unit import Unit
 from target import Target
-from defended_target import DefendedTarget
-from destroyer_target import DestroyerTarget
 from player import Player
 from player import Action
 from background import Background
 import utils
 import modifier
-
+from random import choice
 
 class Game:
     def __init__(self, width, height):
@@ -29,6 +27,14 @@ class Game:
 
     def add_unit(self, obj):
         self._units.append(obj)
+
+    def player_powerup(self):
+        new_modifier = choice([
+            modifier.FlakShot,
+            modifier.SpreadShot,
+            modifier.ActiveDefense
+        ])(self._player, 1000)
+        self.add_effect(new_modifier)
 
     def add_effect(self, obj):
         self._effects.append(obj)
@@ -75,30 +81,31 @@ class Game:
         print(len(self._effects), len(self._units))
         if not self._player.is_active:
             exit(0)
+        if random() < 0.02:
+            obj = Target(
+                [random() * self._width, 0.],
+                [(random() - 0.5) * 2., random() * 1.]
+            )
+            if not self.get_colliding_units(obj):
+                self.add_unit(obj)
 
-        # Not essential:
-        def _spawn(game, obj, chance):
-            if random() >= chance:
-                return
-            if not game.get_colliding_units(obj):
-                game.add_unit(obj)
-                if isinstance(obj, DefendedTarget):
-                    game.add_effect(modifier.SpreadShot(obj, 0, 5, 15.))
-                    obj.target_shoot = game.get_player().pos
-                elif random() < 0.3:
-                    obj.target_shoot = game.get_player().pos
-        _spawn(self, Target(
-                [random() * self._width, 0.],
-                [(random() - 0.5) * 2., random() * 1.]
-            ), 0.02)
-        _spawn(self, DefendedTarget(
-                [random() * self._width, 0.],
-                [(random() - 0.5) * 2., random() * 1.]
-            ), 0.001)
-        _spawn(self, DestroyerTarget(
-                [random() * self._width, 0.],
-                [(random() - 0.5) * 2., random() * 1.]
-            ), 0.001)
+            def apply_effect(game, obj, effect):
+                obj.radius += 3.
+                obj.hp += 1.
+                game.add_effect(effect)
+
+            if random() < 0.3:
+                obj.target_shoot = self.get_player().pos
+                if random() < 0.05:
+                    apply_effect(self, obj, modifier.FlakShot(obj, 0))
+                if random() < 0.05:
+                    apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
+            if random() < 0.05:
+                apply_effect(self, obj, modifier.Defenders(obj, 0))
+            if random() < 0.05:
+                apply_effect(self, obj, modifier.ActiveDefense(obj, 0, 50., 0.3))
+                obj.target_move = self.get_player().pos
+
 
     def draw(self):
         self._bgr.draw(self._surface)

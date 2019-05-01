@@ -23,6 +23,8 @@ class Unit(Object):
 
     @staticmethod
     def take_damage(obj, game, source):
+        if obj.defenders:
+            return
         obj.hp -= source.damage
         if obj.hp < 1.:
             obj.is_active = False
@@ -37,6 +39,7 @@ class Unit(Object):
 
     def __init__(self, pos, speed, radius):
         super().__init__(pos, speed, radius)
+        self.defenders = []
         self.target_shoot = None
         self.on_shoot = []
         self.on_hit = []

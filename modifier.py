@@ -4,10 +4,11 @@ import math
 
 from bullet import Bullet
 from explosion import Explosion
+from target import Target
 import utils
 
 import pygame
-
+from random import choice
 class BaseModifier:
 
     @staticmethod
@@ -30,12 +31,6 @@ class BaseModifier:
         else:
             self._is_permanent = True
         self.on_update = [self.process]
-
-    def detach(self):
-        pass
-
-    def draw(self, game, surface):
-        pass
 
 
 class SpreadShot(BaseModifier):
@@ -99,14 +94,14 @@ class ActiveDefense(BaseModifier):
             self._game.append(game)
         self._spawn_countdown -= 1
 
-    def __init__(self, holder, duration, damage=0.5):
+    def __init__(self, holder, duration, rotation_radius=100.*random()+50., damage=0.5):
         super().__init__(holder, duration)
         self._bullets = []
         self._game = []
         self._max_bullets = 5
         self._spawn_period = 100
         self._spawn_countdown = 0
-        self._rotation_radius = 100. * random() + 100.
+        self._rotation_radius = rotation_radius
         self._damage = damage
         self.on_update.append(self.spawn_bullet)
 
@@ -115,7 +110,6 @@ class ActiveDefense(BaseModifier):
             explosion = Explosion(bullet.pos.copy(), self._holder, self._damage)
             game.add_effect(explosion)
             bullet.is_active = False
-        super().detach()
 
     def draw(self, game, surface):
         color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
@@ -127,7 +121,7 @@ class ActiveDefense(BaseModifier):
 
 class FlakShot(BaseModifier):
 
-    def __init__(self, holder, duration, damage=0.3):
+    def __init__(self, holder, duration, damage=0.1):
         super().__init__(holder, duration)
         self._damage = damage
 
@@ -155,3 +149,38 @@ class FlakShot(BaseModifier):
                        round(self._holder.pos[1] + vector_end[1] - 1.)]
             pygame.draw.line(surface, color, pos_start, pos_end)
 
+
+class Defenders(BaseModifier):
+
+    def __init__(self, holder, duration):
+        super().__init__(holder, duration)
+        self._max_range = 150.
+
+        @utils.with_chance(0.02)
+        def update_defenders(obj, game):
+            obj.defenders = [o for o in obj.defenders
+                             if o.is_active and utils.dist(o.pos, obj.pos) < 2. * self._max_range]
+            target_units = game.get_units(obj, self._max_range,
+                                          lambda _, x: isinstance(x, Target) and not x == obj and x not in obj.defenders)
+            if target_units:
+                obj.defenders.append(choice(target_units))
+
+        self._effect = update_defenders
+        self._holder.on_update.append(self._effect)
+
+    def detach(self):
+        self._holder.defenders = []
+        self._holder.on_update.remove(self._effect)
+
+    def draw(self, game, surface):
+        N = 50
+        for o in self._holder.defenders:
+            for i in range(N):
+                pos = [self._holder.pos[0] + (o.pos[0] - self._holder.pos[0]) * i / N,
+                       self._holder.pos[1] + (o.pos[1] - self._holder.pos[1]) * i / N]
+                if utils.dist(pos, o.pos) < o.radius:
+                    continue
+                if utils.dist(pos, self._holder.pos) < self._holder.radius:
+                    continue
+                pos = [int(pos[0]), int(pos[1])]
+                surface.set_at(pos, (200., 200., 200.))
