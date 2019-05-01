@@ -6,6 +6,7 @@ from bullet import Bullet
 from explosion import Explosion
 import utils
 
+import pygame
 
 class BaseModifier:
 
@@ -37,24 +38,46 @@ class BaseModifier:
         pass
 
 
-class TripleAttack(BaseModifier):
+class SpreadShot(BaseModifier):
 
-    def __init__(self, holder):
-        super().__init__(holder, 1000)
-        self._spread = 0.2 * random()
+    def __init__(self, holder, duration, count=4, spread=5.*random() + 10.):
+        super().__init__(holder, duration)
+        if count <= 1:
+            raise AttributeError("Can not spread into less than 2 bullets")
+        self._count = count
+        self._spread = spread * math.pi / 180.
 
-        def triple_attack(obj, game, bullet):
-            for speed_change in [-0.2 - self._spread, 0.2 + self._spread]:
+        def spread_shot(obj, game, bullet):
+            ro, phi = utils.cartesian2polar(bullet.speed)
+            for i in range(self._count):
+                angle = phi - self._spread + 2. * self._spread * i / (self._count - 1.)
                 bullet_new = copy.copy(bullet)
                 bullet_new.pos = bullet.pos.copy()
-                bullet_new.speed = bullet.speed.copy()
-                bullet_new.speed[0] += speed_change
+                bullet_new.speed = utils.polar2cartesian([ro, angle])
                 game.add_effect(bullet_new)
-        self._effect = triple_attack
+            bullet.is_active = False
+
+        self._effect = spread_shot
         self._holder.on_shoot.append(self._effect)
 
     def detach(self):
         self._holder.on_shoot.remove(self._effect)
+
+    def draw(self, game, surface):
+        color = (50., 50., 200.) if self._holder == game.get_player() else (200., 50., 50.)
+        for i in range(self._count):
+            phi = utils.cartesian2polar([
+                    self._holder.target_shoot[0] - self._holder.pos[0],
+                    self._holder.target_shoot[1] - self._holder.pos[1]
+                  ])[1] if self._holder.target_shoot else -0.5*math.pi
+            vector = utils.polar2cartesian([1., phi - self._spread + 2. * self._spread * i / (self._count - 1.)])
+            N = 10
+            for idx in range(N//2, N + N//2):
+                draw_pos = [
+                    int(self._holder.pos[0] + 2. * self._holder.radius * vector[0] * idx / N),
+                    int(self._holder.pos[1] + 2. * self._holder.radius * vector[1] * idx / N),
+                ]
+                surface.set_at(draw_pos, color)
 
 
 class ActiveDefense(BaseModifier):
@@ -66,38 +89,50 @@ class ActiveDefense(BaseModifier):
             self._bullets = [o for o in self._bullets if o.is_active]
             if len(self._bullets) == self._max_bullets:
                 return
-            bullet = Bullet(self._holder.pos.copy(), [0., 3.], self._holder, 1.5)
-            bullet.target = self._holder
-            bullet.anchor_radius = 100. * random() + 100.
+            shift = utils.polar2cartesian([self._rotation_radius, 2. * math.pi * self._spawn_countdown / self._spawn_period])
+            spawn_pos = [self._holder.pos[0] + shift[0], self._holder.pos[1] + shift[1]]
+            bullet = Bullet(spawn_pos, [0., 3.], self._holder, self._damage)
+            bullet.target_move = self._holder.pos
+            bullet.rotation_radius = self._rotation_radius
             game.add_effect(bullet)
             self._bullets.append(bullet)
             self._game.append(game)
         self._spawn_countdown -= 1
 
-    def __init__(self, holder):
-        super().__init__(holder, 1500)
+    def __init__(self, holder, duration, damage=0.5):
+        super().__init__(holder, duration)
         self._bullets = []
         self._game = []
         self._max_bullets = 5
         self._spawn_period = 100
         self._spawn_countdown = 0
+        self._rotation_radius = 100. * random() + 100.
+        self._damage = damage
         self.on_update.append(self.spawn_bullet)
 
     def detach(self):
         for bullet, game in zip(self._bullets, self._game):
-            explosion = Explosion(bullet.pos.copy(), self._holder, 0.5)
+            explosion = Explosion(bullet.pos.copy(), self._holder, self._damage)
             game.add_effect(explosion)
             bullet.is_active = False
         super().detach()
 
+    def draw(self, game, surface):
+        color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+        shift = utils.polar2cartesian([self._rotation_radius, 2.*math.pi*self._spawn_countdown/self._spawn_period])
+        draw_pos = [round(self._holder.pos[0] + shift[0]),
+                    round(self._holder.pos[1] + shift[1])]
+        pygame.draw.circle(surface, color, draw_pos, 3, 1)
 
-class SplashAttack(BaseModifier):
 
-    def __init__(self, holder):
-        super().__init__(holder, 1000)
+class FlakShot(BaseModifier):
+
+    def __init__(self, holder, duration, damage=0.3):
+        super().__init__(holder, duration)
+        self._damage = damage
 
         def splash_attack(obj, game, target):
-            explosion = Explosion(target.pos.copy(), obj, 0.3)
+            explosion = Explosion(target.pos.copy(), obj, self._damage)
             explosion.already_hit.add(target)
             explosion.radius += 5.
             game.add_effect(explosion)
@@ -107,62 +142,16 @@ class SplashAttack(BaseModifier):
     def detach(self):
         self._holder.on_hit.remove(self._effect)
 
-
-class ShootAt(BaseModifier):
-
-    def __init__(self, holder, target):
-        super().__init__(holder, 0)
-        self._target = target
-
-        def shoot_at(obj, game, bullet):
-            ro = utils.cartesian2polar(bullet.speed)[0]
-            vector = [self._target.pos[0] - obj.pos[0],
-                      self._target.pos[1] - obj.pos[1]]
-            phi = utils.cartesian2polar(vector)[1]
-            bullet.speed = utils.polar2cartesian([ro, phi])
-        self._effect = shoot_at
-        self._holder.on_shoot.append(self._effect)
-
-    def detach(self):
-        self._holder.on_shoot.remove(self._effect)
-
     def draw(self, game, surface):
-        vector = utils.normalize([
-            self._target.pos[0] - self._holder.pos[0],
-            self._target.pos[1] - self._holder.pos[1]
-        ])
-        N = 10
-        for i in range(3, N+3):
-            draw_pos = [
-                int(self._holder.pos[0] + 2. * self._holder.radius * vector[0] * i / N),
-                int(self._holder.pos[1] + 2. * self._holder.radius * vector[1] * i / N),
-            ]
-            surface.set_at(draw_pos, (200., 50., 50.))
+        color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+        N = 50
+        for _ in range(N):
+            phi = random() * 2 * math.pi
+            vector_start = utils.polar2cartesian([self._holder.radius + 6. + random() * 6.0, phi])
+            vector_end = utils.polar2cartesian([self._holder.radius + 5., phi])
+            pos_start = [round(self._holder.pos[0] + vector_start[0] - 1.),
+                         round(self._holder.pos[1] + vector_start[1] - 1.)]
+            pos_end = [round(self._holder.pos[0] + vector_end[0] - 1.),
+                       round(self._holder.pos[1] + vector_end[1] - 1.)]
+            pygame.draw.line(surface, color, pos_start, pos_end)
 
-
-class SpreadShot(BaseModifier):
-
-    def __init__(self, holder, count, spread):
-        super().__init__(holder, 0)
-        if count <= 1:
-            raise AttributeError("Can not spread into less than 2 bullets")
-        self._count = count
-        self._spread = spread * math.pi / 180.
-
-        def spread_shot(obj, game, bullet):
-            ro, phi = utils.cartesian2polar(bullet.speed)
-            for i in range(self._count):
-                angle = phi - self._spread + 2.*self._spread*i/(self._count-1.)
-                bullet_new = copy.copy(bullet)
-                bullet_new.pos = bullet.pos.copy()
-                bullet_new.speed = utils.polar2cartesian([ro, angle])
-                game.add_effect(bullet_new)
-            bullet.is_active = False
-        self._effect = spread_shot
-        self._holder.on_shoot.append(self._effect)
-
-    def detach(self):
-        self._holder.on_shoot.remove(self._effect)
-
-
-PLAYER_MODIFIERS = [TripleAttack, ActiveDefense, SplashAttack]

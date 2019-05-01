@@ -83,8 +83,10 @@ class Game:
             if not game.get_colliding_units(obj):
                 game.add_unit(obj)
                 if isinstance(obj, DefendedTarget):
-                    game.add_effect(modifier.SpreadShot(obj, 5, 15.))
-                    game.add_effect(modifier.ShootAt(obj, game.get_player()))
+                    game.add_effect(modifier.SpreadShot(obj, 0, 5, 15.))
+                    obj.target_shoot = game.get_player().pos
+                elif random() < 0.3:
+                    obj.target_shoot = game.get_player().pos
         _spawn(self, Target(
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]

@@ -17,10 +17,10 @@ class PickUp(Object):
             player.hp += obj.healing
             player.score += 3.
             new_modifier = choice([
-                modifier.SplashAttack,
-                modifier.TripleAttack,
+                modifier.FlakShot,
+                modifier.SpreadShot,
                 modifier.ActiveDefense
-            ])(player)
+            ])(player, 1000)
             game.add_effect(new_modifier)
             obj.is_active = False
 

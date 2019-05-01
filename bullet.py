@@ -13,7 +13,7 @@ class Bullet(Object):
                 if to_hit == obj.source:
                     continue
                 if obj.source:
-                    for func in obj.source.on_hit:
+                    for func in obj.source.on_hit:  # TODO: apply on_hit for both bullet and source
                         func(obj.source, game, to_hit)
                 for func in to_hit.on_get_hit:
                     func(to_hit, game, obj)
@@ -27,9 +27,6 @@ class Bullet(Object):
 
     def draw(self, game, surface):
         color_intensity = 150.*self.charge if self.charge < 1. else 255.
-        if self.source == game.get_player():
-            color = (0., 0., color_intensity)
-        else:
-            color = (color_intensity, 0., 0.)
+        color = (0., 0., color_intensity) if self.source == game.get_player() else (color_intensity, 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0)
+        pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0 if self.damage else 1)
