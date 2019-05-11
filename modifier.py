@@ -170,15 +170,19 @@ class Defenders(BaseModifier):
     def __init__(self, holder, duration):
         super().__init__(holder, duration)
         self._max_range = 150.
+        self._defender = None
 
         @utils.with_chance(0.02)
         def update_defenders(obj, game):
-            obj.defenders = [o for o in obj.defenders
-                             if o.is_active and utils.dist(o.pos, obj.pos) < 2. * self._max_range]
-            target_units = game.get_units(obj, self._max_range,
-                                          lambda _, x: isinstance(x, Target) and not x == obj and x not in obj.defenders)
-            if target_units:
-                obj.defenders.append(choice(target_units))
+            if self._defender:
+                if not self._defender.is_active or utils.dist(self._defender.pos, obj.pos) > 1.5 * self._max_range:
+                    obj.defenders.remove(self._defender)
+                    self._defender = None
+            if not self._defender:
+                targets = game.get_units(obj, self._max_range, lambda _, x: x != obj and x not in obj.defenders)
+                if targets:
+                    self._defender = choice(targets)
+                    obj.defenders.append(self._defender)
 
         self._effect = update_defenders
         self._holder.on_update.append(self._effect)
@@ -188,15 +192,17 @@ class Defenders(BaseModifier):
         self._holder.on_update.remove(self._effect)
 
     def draw(self, game, surface, erase):
+        if not self._defender:
+            return
         color = (255., 255., 255.) if erase else (200., 200., 200.)
         N = 50
-        for o in self._holder.defenders:
-            for i in range(N):
-                pos = [self._holder.pos[0] + (o.pos[0] - self._holder.pos[0]) * i / N,
-                       self._holder.pos[1] + (o.pos[1] - self._holder.pos[1]) * i / N]
-                if utils.dist(pos, o.pos) < o.radius:
-                    continue
-                if utils.dist(pos, self._holder.pos) < self._holder.radius:
-                    continue
-                pos = [int(pos[0]), int(pos[1])]
-                surface.set_at(pos, color)
+        o = self._defender
+        for i in range(N):
+            pos = [self._holder.pos[0] + (o.pos[0] - self._holder.pos[0]) * (i*i) / (N*N),
+                    self._holder.pos[1] + (o.pos[1] - self._holder.pos[1]) * (i*i) / (N*N)]
+            if utils.dist(pos, o.pos) < o.radius:
+                continue
+            if utils.dist(pos, self._holder.pos) < self._holder.radius:
+                continue
+            draw_pos = [int(pos[0]), int(pos[1])]
+            surface.set_at(draw_pos, color)
