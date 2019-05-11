@@ -15,6 +15,7 @@ class Game:
     def __init__(self, width, height):
         pygame.init()
         self._surface = pygame.display.set_mode((width, height))
+        self._surface.fill((255., 255., 255.))
         self._bgr = Background(width, height)
         self._player = Player([width/2., height - 100.], [0., 0.])
         self._effects = []  # e.g. bullets, explosions, power-ups, etc
@@ -107,12 +108,13 @@ class Game:
                 obj.target_move = self.get_player().pos
 
 
-    def draw(self):
-        self._bgr.draw(self._surface)
+    def draw(self, erase=False):
+        #self._bgr.draw(self._surface)
         for obj in self._units + self._effects:
             if obj.is_active:
-                obj.draw(self, self._surface)
-        pygame.display.flip()
+                obj.draw(self, self._surface, erase)
+        if not erase:
+            pygame.display.flip()
 
     def process_event(self, event):
         key2action = {  # update in options

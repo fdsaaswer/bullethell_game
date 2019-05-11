@@ -58,8 +58,11 @@ class SpreadShot(BaseModifier):
     def detach(self):
         self._holder.on_shoot.remove(self._effect)
 
-    def draw(self, game, surface):
-        color = (50., 50., 200.) if self._holder == game.get_player() else (200., 50., 50.)
+    def draw(self, game, surface, erase):
+        if erase:
+            color = (255., 255., 255.)
+        else:
+            color = (50., 50., 200.) if self._holder == game.get_player() else (200., 50., 50.)
         for i in range(self._count):
             phi = utils.cartesian2polar([
                     self._holder.target_shoot[0] - self._holder.pos[0],
@@ -111,8 +114,11 @@ class ActiveDefense(BaseModifier):
             game.add_effect(explosion)
             bullet.is_active = False
 
-    def draw(self, game, surface):
-        color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+    def draw(self, game, surface, erase):
+        if erase:
+            color = (255., 255., 255.,)
+        else:
+            color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
         shift = utils.polar2cartesian([self._rotation_radius, 2.*math.pi*self._spawn_countdown/self._spawn_period])
         draw_pos = [round(self._holder.pos[0] + shift[0]),
                     round(self._holder.pos[1] + shift[1])]
@@ -124,6 +130,8 @@ class FlakShot(BaseModifier):
     def __init__(self, holder, duration, damage=0.1):
         super().__init__(holder, duration)
         self._damage = damage
+        self._gfx_radii = []
+        self._gfx_phi = []
 
         def splash_attack(obj, game, target):
             explosion = Explosion(target.pos.copy(), obj, self._damage)
@@ -136,13 +144,20 @@ class FlakShot(BaseModifier):
     def detach(self):
         self._holder.on_hit.remove(self._effect)
 
-    def draw(self, game, surface):
-        color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+    def draw(self, game, surface, erase):
         N = 50
-        for _ in range(N):
-            phi = random() * 2 * math.pi
-            vector_start = utils.polar2cartesian([self._holder.radius + 6. + random() * 6.0, phi])
-            vector_end = utils.polar2cartesian([self._holder.radius + 5., phi])
+        if erase:
+            color = (255., 255., 255.)
+        else:
+            color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+            self._gfx_phi.clear()
+            self._gfx_radii.clear()
+            for i in range(N):
+                self._gfx_phi.append(random() * 2 * math.pi)
+                self._gfx_radii.append(self._holder.radius + 6. + random() * 6.0)
+        for i in range(N):
+            vector_start = utils.polar2cartesian([self._gfx_radii[i], self._gfx_phi[i]])
+            vector_end = utils.polar2cartesian([self._holder.radius + 5., self._gfx_phi[i]])
             pos_start = [round(self._holder.pos[0] + vector_start[0] - 1.),
                          round(self._holder.pos[1] + vector_start[1] - 1.)]
             pos_end = [round(self._holder.pos[0] + vector_end[0] - 1.),
@@ -172,7 +187,8 @@ class Defenders(BaseModifier):
         self._holder.defenders = []
         self._holder.on_update.remove(self._effect)
 
-    def draw(self, game, surface):
+    def draw(self, game, surface, erase):
+        color = (255., 255., 255.) if erase else (200., 200., 200.)
         N = 50
         for o in self._holder.defenders:
             for i in range(N):
@@ -183,4 +199,4 @@ class Defenders(BaseModifier):
                 if utils.dist(pos, self._holder.pos) < self._holder.radius:
                     continue
                 pos = [int(pos[0]), int(pos[1])]
-                surface.set_at(pos, (200., 200., 200.))
+                surface.set_at(pos, color)

@@ -31,11 +31,16 @@ class Target(Unit):
         self.on_update.append(self.shoot)
         self.charge_speed = 0.005 * random()
 
-    def draw(self, game, surface):
-        super().draw(game, surface)
+    def draw(self, game, surface, erase):
+        super().draw(game, surface, erase)
+        if erase:
+            color_inner = (255., 255., 255.)
+            color_outer = (255., 255., 255.)
+        else:
+            color_inner = [255. - 155.*(self.hp % 1.)] * 3
+            color_outer = (0., 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, [255] * 3, draw_pos, int(self.radius), 0)
         for i in range(int(self.hp)):
-            pygame.draw.circle(surface, [0] * 3, draw_pos, int(self.radius) - 2*i, 1)
+            pygame.draw.circle(surface, color_outer, draw_pos, int(self.radius) - 2*i, 1)
         if self.hp % 1 > 0.1:
-            pygame.draw.circle(surface, [255. - 155.*(self.hp % 1.)] * 3, draw_pos, int(self.radius) - 2*(i+1), 1)
+            pygame.draw.circle(surface, color_inner, draw_pos, int(self.radius) - 2*(i+1), 1)

@@ -65,14 +65,20 @@ class Player(Unit):
         self.damage = 0.4
         self.score = 0
 
-    def draw(self, game, surface):
-        super().draw(game, surface)
+    def draw(self, game, surface, erase):
+        super().draw(game, surface, erase)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, (0, 0, 0), draw_pos, int(self.radius), 0)
-        pygame.draw.circle(surface,
-                           (self.charge * 150. if self.charge < 1. else 255., 0, 0),
-                           draw_pos, int(self.radius), 4)
+
+        if erase:
+            pygame.draw.circle(surface, (255., 255., 255.), draw_pos, int(self.radius)+1, 0)
+        else:
+            pygame.draw.circle(surface, (0., 0., 0.,), draw_pos, int(self.radius), 0)
+            pygame.draw.circle(surface,
+                               (self.charge * 150. if self.charge < 1. else 255., 0, 0),
+                               draw_pos, int(self.radius), 4)
         pygame.font.init()
         font = pygame.font.SysFont('consolas', 20)
-        text_surface = font.render(str(self.score) + ', ' + str(self.hp), True, (255, 0, 0))
+        text_surface = font.render(str(self.score) + ', ' + str(round(self.hp, 1)), True, (255., 0., 0.))
+        if erase:
+            text_surface.fill((255., 255., 255.))
         surface.blit(text_surface, (50, 50, 100, 50))

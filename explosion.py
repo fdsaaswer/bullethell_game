@@ -32,11 +32,14 @@ class Explosion(Object):
         self.damage = damage
         self.already_hit = set()
 
-    def draw(self, game, surface):
-        color_intensity = 255.*(1. - self.charge) if self.charge < 0.75 else 0.
-        if self.source == game.get_player():
-            color = (0., 0., color_intensity)
+    def draw(self, game, surface, erase):
+        if erase:
+            color = (255., 255., 255.)
         else:
-            color = (color_intensity, 0., 0.)
+            color_intensity = 255.*(1. - self.charge) if self.charge < 0.75 else 0.
+            if self.source == game.get_player():
+                color = (0., 0., color_intensity)
+            else:
+                color = (color_intensity, 0., 0.)
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
         pygame.draw.circle(surface, color, draw_pos, int(self.radius), 1)

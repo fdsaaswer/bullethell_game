@@ -49,9 +49,9 @@ class Unit(Object):
         self.hp = 1.
         self.score_cost = 1.
 
-    def draw(self, game, surface):
+    def draw(self, game, surface, erase):
         if self.target_shoot:
-            color = (50., 50., 50)
+            color = (255., 255., 255.,) if erase else (50., 50., 50.)
             vector = [self.target_shoot[0] - self.pos[0],
                       self.target_shoot[1] - self.pos[1]]
             phi = utils.cartesian2polar(vector)[1]

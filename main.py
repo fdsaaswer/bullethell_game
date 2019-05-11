@@ -9,8 +9,9 @@ if __name__ == '__main__':
     game = Game(WIDTH, HEIGHT)
     while 1:
         before = time.clock()
+        game.draw(True)
         game.update()
-        game.draw()
+        game.draw(False)
         game.process_event(pygame.event.poll())
         after = time.clock()
         TIME_PERIOD = 0.01
