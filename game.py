@@ -99,7 +99,7 @@ class Game:
             if random() < 0.3:
                 obj.target_shoot = self.get_player().pos
                 if random() < 0.05:
-                    apply_effect(self, obj, modifier.FlakShot(obj, 0))
+                    apply_effect(self, obj, modifier.FlakShot(obj, 0, 0.2))
                 if random() < 0.05:
                     apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
             if random() < 0.05:

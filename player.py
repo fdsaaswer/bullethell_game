@@ -34,9 +34,7 @@ class Player(Unit):
             obj.speed[1] += 0.05
         if obj.action & Action.ATTACK:
             obj.action &= ~Action.ATTACK
-            obj.target_shoot = (obj.pos[0], obj.pos[1]-1.)
-            obj.shoot(obj, game)
-            obj.target_shoot = None
+            obj.shoot(obj, game, 0.1, [0., -1. * obj.bullet_speed])
 
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)

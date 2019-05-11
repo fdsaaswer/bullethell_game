@@ -13,16 +13,17 @@ class Unit(Object):
 
 
     @staticmethod
-    def shoot(obj, game):
-        if obj.charge < 0.1:
+    def shoot(obj, game, charge_cost=0.1, speed=None):
+        if obj.charge < charge_cost:
             return
-        obj.charge -= 0.1
-        if obj.target_shoot:
-            vector = [obj.target_shoot[0] - obj.pos[0],
-                      obj.target_shoot[1] - obj.pos[1]]
-            speed = utils.normalize(vector, obj.bullet_speed)
-        else:
-            speed = utils.normalize(obj.speed, obj.bullet_speed)
+        obj.charge -= charge_cost
+        if not speed:
+            if obj.target_shoot:
+                vector = [obj.target_shoot[0] - obj.pos[0],
+                          obj.target_shoot[1] - obj.pos[1]]
+                speed = utils.normalize(vector, obj.bullet_speed)
+            else:
+                speed = utils.normalize(obj.speed, obj.bullet_speed)
         bullet = Bullet(obj.pos.copy(), speed, obj, obj.bullet_damage)
         game.add_effect(bullet)
         for func in obj.on_shoot:
@@ -58,7 +59,6 @@ class Unit(Object):
         super().__init__(pos, speed, radius)
         self.defenders = []
         self.on_shoot = []
-        self.on_hit = []
         self.on_get_hit = [self.take_damage]
         self.on_kill = []
         self.on_update = [self.position_shift,

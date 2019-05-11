@@ -2,6 +2,19 @@ import pygame
 
 from object import Object
 
+def hit(obj, game, one_time):
+    for to_hit in game.get_colliding_units(obj):
+        if to_hit == obj.source or to_hit in obj.ignored:
+            continue
+        for func in obj.on_hit:
+            func(obj, game, to_hit)
+        for func in to_hit.on_get_hit:
+            func(to_hit, game, obj)
+        if one_time:
+            obj.is_active = False
+        else:
+            obj.ignored.add(to_hit)
+
 
 class Explosion(Object):
 
@@ -14,15 +27,7 @@ class Explosion(Object):
             return
         if obj.charge >= 0.75:  # black is safe
             return
-        for to_hit in game.get_colliding_units(obj):
-            if to_hit == obj.source or to_hit in obj.already_hit:
-                continue
-            if obj.source:
-                for func in obj.source.on_hit:
-                    func(obj.source, game, to_hit)
-            for func in to_hit.on_get_hit:
-                func(to_hit, game, obj)
-            obj.already_hit.add(to_hit)
+        hit(obj, game, False)
 
     def __init__(self, pos, source, damage):
         super().__init__(pos, [0., 1.], 10.)
@@ -30,7 +35,8 @@ class Explosion(Object):
         self.radius_speed = 1.1
         self.source = source
         self.damage = damage
-        self.already_hit = set()
+        self.ignored = set()
+        self.on_hit = []
 
     def draw(self, game, surface, erase):
         if erase:

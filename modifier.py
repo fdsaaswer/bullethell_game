@@ -127,22 +127,43 @@ class ActiveDefense(BaseModifier):
 
 class FlakShot(BaseModifier):
 
-    def __init__(self, holder, duration, damage=0.1):
+    def __init__(self, holder, duration, damage=0.05):
         super().__init__(holder, duration)
         self._damage = damage
         self._gfx_radii = []
         self._gfx_phi = []
+        self._bullet_speed = None
+        self._wait = 20
 
         def splash_attack(obj, game, target):
-            explosion = Explosion(target.pos.copy(), obj, self._damage)
-            explosion.already_hit.add(target)
-            explosion.radius += 5.
+            explosion = Explosion(obj.pos.copy(), obj.source, self._damage)
             game.add_effect(explosion)
-        self._effect = splash_attack
-        self._holder.on_hit.append(self._effect)
+
+        def add_splash_attack(obj, game, bullet):
+            self._bullet_speed = bullet.speed
+            bullet.on_hit.append(splash_attack)
+
+        def flak_shots(obj, game):
+            if self._bullet_speed:
+                if self._wait != 0:
+                    self._wait -= 1
+                else:
+                    speed = self._bullet_speed
+                    speed[0] += -0.2 + 0.4*random()
+                    bullet = Bullet(obj.pos.copy(), speed, obj, 0.)
+                    game.add_effect(bullet)
+                    for func in obj.on_shoot:
+                        func(obj, game, bullet)
+                    self._wait = 20 + int(10.*random())
+
+        self._effect_splash = add_splash_attack
+        self._effect_spawn = flak_shots
+        self._holder.on_shoot.append(self._effect_splash)
+        self._holder.on_update.append(self._effect_spawn)
 
     def detach(self):
-        self._holder.on_hit.remove(self._effect)
+        self._holder.on_shoot.remove(self._effect_splash)
+        self._holder.on_update.remove(self._effect_spawn)
 
     def draw(self, game, surface, erase):
         N = 50
