@@ -2,8 +2,8 @@ import copy
 from random import random
 import math
 
-from bullet import Bullet
-from explosion import Explosion
+from hit import Bullet
+from hit import Explosion
 import utils
 
 import pygame

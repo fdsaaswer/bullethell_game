@@ -1,9 +1,6 @@
 from enum import IntEnum
 
-import pygame
-
-from bullet import Bullet
-from explosion import Explosion
+from hit import Explosion
 from unit import Unit
 
 

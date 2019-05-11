@@ -2,8 +2,8 @@ import utils
 
 from random import random
 from object import Object
-from explosion import Explosion
-from bullet import Bullet
+from hit import Explosion
+from hit import Bullet
 from pickup import PickUp
 
 import pygame
