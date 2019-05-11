@@ -2,6 +2,7 @@ import pygame
 
 from object import Object
 
+import utils
 
 class Bullet(Object):
 
@@ -21,7 +22,7 @@ class Bullet(Object):
 
     def __init__(self, pos, speed, source, damage):
         super().__init__(pos, speed, 5.)
-        self.charge_speed = 0.01
+        self.charge_speed = 0.01 * utils.norm(speed)
         self.source = source
         self.damage = damage
 

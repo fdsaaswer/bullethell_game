@@ -34,17 +34,9 @@ class Player(Unit):
             obj.speed[1] += 0.05
         if obj.action & Action.ATTACK:
             obj.action &= ~Action.ATTACK
-            if obj.charge >= 0.1:
-                obj.charge -= 0.1
-                bullet = Bullet(
-                    obj.pos.copy(),
-                    [0., -3.],
-                    obj, obj.damage
-                )
-                bullet.charge_speed *= 3
-                game.add_effect(bullet)
-                for func in obj.on_shoot:
-                    func(obj, game, bullet)
+            obj.target_shoot = (obj.pos[0], obj.pos[1]-1.)
+            obj.shoot(obj, game)
+            obj.target_shoot = None
 
     def __init__(self, pos, speed):
         super().__init__(pos, speed, 15.)
@@ -63,7 +55,8 @@ class Player(Unit):
                           self.process_action]
         self.action = Action.NO_ACTION
         self.hp += 3.
-        self.damage = 0.4
+        self.bullet_speed = 3.0
+        self.bullet_damage = 0.4
         self.score = 0
         self.charge_speed = 0.001
 

@@ -14,18 +14,22 @@ class with_chance:
         return wrapped_f
 
 
+def norm(vector):
+    return math.sqrt(vector[0] ** 2 + vector[1] ** 2)
+
 def normalize(vector, rho=1):
     a = vector[0]
     b = vector[1]
-    norm = math.sqrt(a * a + b * b)
+    norm = math.sqrt(a ** 2 + b ** 2)
     if norm == 0.:
         return vector
     return [a*rho/norm, b*rho/norm]
 
+
 def dist(pos_1, pos_2):
     a = pos_1[0] - pos_2[0]
     b = pos_1[1] - pos_2[1]
-    return math.sqrt(a * a + b * b)
+    return math.sqrt(a ** 2 + b ** 2)
 
 
 def cartesian2polar(coord):

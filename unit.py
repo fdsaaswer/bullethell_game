@@ -20,10 +20,10 @@ class Unit(Object):
         if obj.target_shoot:
             vector = [obj.target_shoot[0] - obj.pos[0],
                       obj.target_shoot[1] - obj.pos[1]]
-            speed = utils.normalize(vector, 1.5 + 0.5*random())
+            speed = utils.normalize(vector, obj.bullet_speed)
         else:
-            speed = utils.normalize(obj.speed, 1.5 + 0.5*random())
-        bullet = Bullet(obj.pos.copy(), speed, obj, obj.damage)
+            speed = utils.normalize(obj.speed, obj.bullet_speed)
+        bullet = Bullet(obj.pos.copy(), speed, obj, obj.bullet_damage)
         game.add_effect(bullet)
         for func in obj.on_shoot:
             func(obj, game, bullet)
@@ -68,7 +68,8 @@ class Unit(Object):
         self.target_shoot = None
         self.colliding_units = []
         self.hp = 1.
-        self.damage = 0.5
+        self.bullet_speed = 1.5
+        self.bullet_damage = 1.0
         self.score_cost = 1.
         self.charge_speed = 0.001 * random()
 
