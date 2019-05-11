@@ -41,6 +41,5 @@ class Object:
         self.is_active = True
         self.charge = 0.
         self.charge_speed = 0.
-        self.on_update = []
-        self.on_update.append(self.position_shift)
-        self.on_update.append(self.charge_up)
+        self.on_update = [self.position_shift,
+                          self.charge_up]

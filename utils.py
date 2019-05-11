@@ -18,6 +18,8 @@ def normalize(vector, rho=1):
     a = vector[0]
     b = vector[1]
     norm = math.sqrt(a * a + b * b)
+    if norm == 0.:
+        return vector
     return [a*rho/norm, b*rho/norm]
 
 def dist(pos_1, pos_2):

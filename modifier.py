@@ -4,11 +4,11 @@ import math
 
 from bullet import Bullet
 from explosion import Explosion
-from target import Target
 import utils
 
 import pygame
 from random import choice
+
 class BaseModifier:
 
     @staticmethod

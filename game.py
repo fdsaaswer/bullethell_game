@@ -3,7 +3,6 @@ import pygame.locals
 from random import random
 
 from unit import Unit
-from target import Target
 from player import Player
 from player import Action
 from background import Background
@@ -83,7 +82,7 @@ class Game:
         if not self._player.is_active:
             exit(0)
         if random() < 0.02:
-            obj = Target(
+            obj = Unit(
                 [random() * self._width, 0.],
                 [(random() - 0.5) * 2., random() * 1.]
             )
@@ -92,9 +91,11 @@ class Game:
 
             def apply_effect(game, obj, effect):
                 obj.radius += 3.
-                obj.hp += 1.
+                obj.hp += 1.0
                 game.add_effect(effect)
 
+            if random() < 0.3:
+                obj.hp += 2.
             if random() < 0.3:
                 obj.target_shoot = self.get_player().pos
                 if random() < 0.05:
@@ -122,8 +123,7 @@ class Game:
             pygame.K_LEFT: Action.MOVE_LEFT,
             pygame.K_RIGHT: Action.MOVE_RIGHT,
             pygame.K_UP: Action.MOVE_UP,
-            pygame.K_DOWN: Action.MOVE_DOWN,
-            pygame.K_LSHIFT: Action.SHIFT
+            pygame.K_DOWN: Action.MOVE_DOWN
         }
 
         if event.type == pygame.KEYDOWN:
