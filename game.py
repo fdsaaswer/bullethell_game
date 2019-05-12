@@ -33,7 +33,8 @@ class Game:
             modifier.ChainShot,
             modifier.SplashShot,
             modifier.SpreadShot,
-            modifier.ActiveDefense
+            modifier.ActiveDefense,
+            modifier.ZapField
         ])(self._player, 1000)
         self.add_effect(new_modifier)
 
@@ -62,11 +63,17 @@ class Game:
         if obj.pos[0] - obj.radius > self._width:
             obj.is_active = False
 
+    def get_effects(self, obj, radius, function):
+        if radius == 0.:
+            return [o for o in self._effects if o.is_active and o != obj and function(obj, o)]
+        else:
+            return [o for o in self._effects if o.is_active and o != obj and function(obj, o) and utils.dist(o.pos, obj.pos) < radius ]
+
     def get_units(self, obj, radius, function): # get units in radius matching condition
         if radius == 0.:
             return [o for o in self._units if o.is_active and o != obj and function(obj, o)]
         else:
-            return [o for o in self._units if o.is_active and utils.dist(o.pos, obj.pos) < radius and o != obj and function(obj, o)]
+            return [o for o in self._units if o.is_active and o != obj and function(obj, o) and utils.dist(o.pos, obj.pos) < radius]
 
     def get_colliding_units(self, obj):
         return self.get_units(obj, 0., lambda obj, o: utils.dist(obj.pos, o.pos) < obj.radius + o.radius)
@@ -79,7 +86,7 @@ class Game:
                     func(obj, self)
         self._effects = [obj for obj in self._effects if obj.is_active]
         self._units = [obj for obj in self._units if obj.is_active]
-        print(len(self._effects), len(self._units))
+        #print(len(self._effects), len(self._units))
         if not self._player.is_active:
             exit(0)
         if random() < 0.02:
@@ -108,6 +115,8 @@ class Game:
             if random() < 0.05:
                 apply_effect(self, obj, modifier.ActiveDefense(obj, 0, 50., 0.3))
                 obj.target_move = self.get_player().pos
+            if random() < 0.05:
+                apply_effect(self, obj, modifier.ZapField(obj, 0, 50.))
 
 
     def draw(self, erase=False):

@@ -214,7 +214,7 @@ class Defenders(BaseModifier):
                     obj.defenders.remove(self._defender)
                     self._defender = None
             if not self._defender:
-                targets = game.get_units(obj, self._max_range, lambda _, x: x != obj and x not in obj.defenders)
+                targets = game.get_units(obj, self._max_range, lambda _, x: x not in obj.defenders)
                 if targets:
                     self._defender = choice(targets)
                     obj.defenders.append(self._defender)
@@ -241,3 +241,50 @@ class Defenders(BaseModifier):
                 continue
             draw_pos = [int(pos[0]), int(pos[1])]
             surface.set_at(draw_pos, color)
+
+class ZapField(BaseModifier):
+
+    @staticmethod
+    def zap(obj, game):
+        if obj._time_to_charge != 0:
+            obj._time_to_charge -= 1
+            return
+        effects = game.get_effects(obj._holder, obj._max_range,
+                                    lambda _, x: isinstance(x, Bullet) and obj._holder != x.source)
+        if effects:
+            bullet = choice(effects)
+            bullet.is_active = False
+            obj._time_to_charge = obj._recharge_period
+            game.add_effect(Explosion(bullet.pos, obj._holder, bullet.damage))
+
+    def __init__(self, holder, duration, range=75. + 25.*random()):
+        super().__init__(holder, duration)
+        self._max_range = range
+        self._recharge_period = 100.
+        self._time_to_charge = 0.
+        self.on_update.append(self.zap)
+
+    def detach(self):
+        pass
+
+    def draw(self, game, surface, erase):
+        color = (255., 255., 255.) if erase else (200., 200., 200.)
+        N = 72
+        phi = 4 * math.pi * self._time_to_charge / self._recharge_period
+        for i in range(N):
+            if self._time_to_charge == 0:
+                vector = utils.polar2cartesian([self._max_range, 2. * math.pi * i / N])
+                pos = [self._holder.pos[0] + vector[0],
+                       self._holder.pos[1] + vector[1]]
+                draw_pos = [int(pos[0]), int(pos[1])]
+                surface.set_at(draw_pos, color)
+            else:
+                vector = utils.polar2cartesian([
+                    self._holder.radius + (self._max_range - self._holder.radius) * i / N,
+                    phi + 2. * math.pi * i / N
+                ])
+                pos = [self._holder.pos[0] + vector[0],
+                       self._holder.pos[1] + vector[1]]
+                draw_pos = [int(pos[0]), int(pos[1])]
+                surface.set_at(draw_pos, color)
+
