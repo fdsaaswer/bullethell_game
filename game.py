@@ -30,7 +30,8 @@ class Game:
 
     def player_powerup(self):
         new_modifier = choice([
-            modifier.FlakShot,
+            modifier.ChainShot,
+            modifier.SplashShot,
             modifier.SpreadShot,
             modifier.ActiveDefense
         ])(self._player, 1000)
@@ -99,7 +100,7 @@ class Game:
             if random() < 0.3:
                 obj.target_shoot = self.get_player().pos
                 if random() < 0.05:
-                    apply_effect(self, obj, modifier.FlakShot(obj, 0, 0.2))
+                    apply_effect(self, obj, modifier.ChainShot(obj, 0, 0.5))
                 if random() < 0.05:
                     apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
             if random() < 0.05:

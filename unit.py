@@ -9,11 +9,11 @@ from pickup import PickUp
 import pygame
 import math
 
+
 class Unit(Object):
 
-
     @staticmethod
-    def shoot(obj, game, charge_cost=0.1, speed=None):
+    def shoot(obj, game, charge_cost=0.1, speed=None, damage=None):
         if obj.charge < charge_cost:
             return
         obj.charge -= charge_cost
@@ -24,7 +24,9 @@ class Unit(Object):
                 speed = utils.normalize(vector, obj.bullet_speed)
             else:
                 speed = utils.normalize(obj.speed, obj.bullet_speed)
-        bullet = Bullet(obj.pos.copy(), speed, obj, obj.bullet_damage)
+        if not damage:
+            damage = obj.bullet_damage
+        bullet = Bullet(obj.pos.copy(), speed, obj, damage)
         game.add_effect(bullet)
         for func in obj.on_shoot:
             func(obj, game, bullet)

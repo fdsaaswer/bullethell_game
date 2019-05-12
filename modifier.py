@@ -125,45 +125,37 @@ class ActiveDefense(BaseModifier):
         pygame.draw.circle(surface, color, draw_pos, 3, 1)
 
 
-class FlakShot(BaseModifier):
+class DelayedShot(BaseModifier):
 
-    def __init__(self, holder, duration, damage=0.05):
+    def __init__(self, holder, duration, game, damage, speed):
         super().__init__(holder, duration)
-        self._damage = damage
-        self._gfx_radii = []
-        self._gfx_phi = []
-        self._bullet_speed = None
-        self._wait = 20
-
-        def splash_attack(obj, game, target):
-            explosion = Explosion(obj.pos.copy(), obj.source, self._damage)
-            game.add_effect(explosion)
-
-        def add_splash_attack(obj, game, bullet):
-            self._bullet_speed = bullet.speed
-            bullet.on_hit.append(splash_attack)
-
-        def flak_shots(obj, game):
-            if self._bullet_speed:
-                if self._wait != 0:
-                    self._wait -= 1
-                else:
-                    speed = self._bullet_speed
-                    speed[0] += -0.2 + 0.4*random()
-                    bullet = Bullet(obj.pos.copy(), speed, obj, 0.)
-                    game.add_effect(bullet)
-                    for func in obj.on_shoot:
-                        func(obj, game, bullet)
-                    self._wait = 20 + int(10.*random())
-
-        self._effect_splash = add_splash_attack
-        self._effect_spawn = flak_shots
-        self._holder.on_shoot.append(self._effect_splash)
-        self._holder.on_update.append(self._effect_spawn)
+        self._game = game
+        self._bullet_damage = damage
+        self._bullet_speed = speed
 
     def detach(self):
-        self._holder.on_shoot.remove(self._effect_splash)
-        self._holder.on_update.remove(self._effect_spawn)
+        self._holder.shoot(self._holder, self._game, 0., self._bullet_speed, self._bullet_damage)
+
+    def draw(self, game, surface, erase):
+        pass
+
+
+class ChainShot(BaseModifier):
+
+    def __init__(self, holder, duration, damage_drop=0.3):
+        super().__init__(holder, duration)
+        self._gfx_radii = []
+        self._gfx_phi = []
+        self._damage_drop = damage_drop
+
+        def start_auto_shot(obj, game, bullet):
+            if bullet.damage > 0.1:
+                game.add_effect(DelayedShot(obj, 10., game, bullet.damage * self._damage_drop, bullet.speed))
+        self._effect = start_auto_shot
+        self._holder.on_shoot.append(self._effect)
+
+    def detach(self):
+        self._holder.on_shoot.remove(self._effect)
 
     def draw(self, game, surface, erase):
         N = 50
@@ -184,6 +176,28 @@ class FlakShot(BaseModifier):
             pos_end = [round(self._holder.pos[0] + vector_end[0] - 1.),
                        round(self._holder.pos[1] + vector_end[1] - 1.)]
             pygame.draw.line(surface, color, pos_start, pos_end)
+
+
+class SplashShot(BaseModifier):
+
+    def __init__(self, holder, duration):
+        super().__init__(holder, duration)
+
+        def splash_attack(obj, game, target):
+            explosion = Explosion(obj.pos.copy(), obj.source, obj.damage)
+            game.add_effect(explosion)
+
+        def add_splash_attack(obj, game, bullet):
+            bullet.on_hit.append(splash_attack)
+
+        self._effect = add_splash_attack
+        self._holder.on_shoot.append(self._effect)
+
+    def detach(self):
+        self._holder.on_shoot.remove(self._effect)
+
+    def draw(self, game, surface, erase):
+        pass
 
 
 class Defenders(BaseModifier):

@@ -43,12 +43,22 @@ class Bullet(Hitter):
 
     def draw(self, game, surface, erase=False):
         if erase:
-            color = (255., 255., 255.)
+            color_charge = (255., 255., 255.)
+            color_internal = (255., 255., 255.)
         else:
-            color_intensity = 150.*self.charge if self.charge < 1. else 255.
-            color = (0., 0., color_intensity) if self.source == game.get_player() else (color_intensity, 0., 0.)
+            color_intensity_charge = 150.*self.charge if self.charge < 1. else 255.
+            color_intensity_internal = 255. * max(0., 1. - self.damage)
+
+            if self.source == game.get_player():
+                color_charge = (0., 0., color_intensity_charge)
+                color_internal = (color_intensity_internal, color_intensity_internal, 255.)
+            else:
+                color_charge = (color_intensity_charge, 0., 0.)
+                color_internal = (255., color_intensity_internal, color_intensity_internal)
+
         draw_pos = (int(self.pos[0]), int(self.pos[1]))
-        pygame.draw.circle(surface, color, draw_pos, int(self.radius), 0 if self.damage else 1)
+        pygame.draw.circle(surface, color_internal, draw_pos, int(self.radius), 0)
+        pygame.draw.circle(surface, color_charge, draw_pos, int(self.radius), 1)
 
 
 class Explosion(Hitter):
