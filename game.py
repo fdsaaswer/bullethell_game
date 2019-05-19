@@ -86,46 +86,43 @@ class Game:
                 for func in obj.on_update:
                     func(obj, self)
         self._units = [obj for obj in self._units if obj.is_active]
-
         for obj in self._effects:
             if obj.is_active:
                 for func in obj.on_update:
                     func(obj, self)
         self._effects = [obj for obj in self._effects if obj.is_active]
-
         if not self._player.is_active:
             exit(0)
+
         if random() < 0.02:
             obj = Unit(
-                [random() * self._width, 0.],
+                [random() * self._width, 10.],
                 [(random() - 0.5) * 2., random() * 1.]
             )
             if not self.get_colliding_units(obj):
+                def apply_effect(game, obj, effect):
+                    obj.radius += 3.
+                    obj.hp += 1.0
+                    game.add_effect(effect)
+                if random() < 0.3:
+                    obj.hp += 2.
+                if random() < 0.3:
+                    obj.target_shoot = self.get_player().pos
+                    if random() < 0.05:
+                        apply_effect(self, obj, modifier.ChainShot(obj, 0, 0.5))
+                        obj.bullet_speed = 3.
+                    if random() < 0.05:
+                        apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
+                    if random() < 0.1:
+                        apply_effect(self, obj, modifier.HomingShot(obj, 0, 0.5))
+                if random() < 0.05:
+                    apply_effect(self, obj, modifier.Defenders(obj, 0))
+                if random() < 0.05:
+                    apply_effect(self, obj, modifier.ActiveDefense(obj, 0, 50., 0.3))
+                    obj.target_move = self.get_player().pos
+                if random() < 0.05:
+                    apply_effect(self, obj, modifier.ZapField(obj, 0, 50.))
                 self.add_unit(obj)
-
-            def apply_effect(game, obj, effect):
-                obj.radius += 3.
-                obj.hp += 1.0
-                game.add_effect(effect)
-
-            if random() < 0.3:
-                obj.hp += 2.
-            if random() < 0.3:
-                obj.target_shoot = self.get_player().pos
-                if random() < 0.05:
-                    apply_effect(self, obj, modifier.ChainShot(obj, 0, 0.5))
-                if random() < 0.05:
-                    apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
-                if random() < 0.1:
-                    apply_effect(self, obj, modifier.HomingShot(obj, 0, 0.5))
-            if random() < 0.05:
-                apply_effect(self, obj, modifier.Defenders(obj, 0))
-            if random() < 0.05:
-                apply_effect(self, obj, modifier.ActiveDefense(obj, 0, 50., 0.3))
-                obj.target_move = self.get_player().pos
-            if random() < 0.05:
-                apply_effect(self, obj, modifier.ZapField(obj, 0, 50.))
-
 
     def draw(self, erase=False):
         #self._bgr.draw(self._surface)

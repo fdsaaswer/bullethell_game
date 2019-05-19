@@ -235,7 +235,8 @@ class HomingShot(BaseModifier):
                 return
             if o != self._holder:
                 raise EnvironmentError("Source of bullet is not holder of modifier")
-            self._holder.shoot(o, game, 0., utils.polar2cartesian([o.bullet_speed, self._phi]), self._damage, to_hit.pos)
+            bullet = self._holder.shoot(o, game, 0., utils.polar2cartesian([o.bullet_speed, self._phi]), self._damage)
+            bullet.target_move = to_hit.pos
 
         def apply_homing_shot(obj, game, bullet):
             bullet.on_hit.append(homing_shot)

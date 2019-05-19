@@ -13,7 +13,7 @@ import math
 class Unit(Object):
 
     @staticmethod
-    def shoot(obj, game, charge_cost=0.1, speed=None, damage=None, target=None):
+    def shoot(obj, game, charge_cost=0.1, speed=None, damage=None):
         if obj.charge < charge_cost:
             return
         obj.charge -= charge_cost
@@ -23,15 +23,14 @@ class Unit(Object):
                           obj.target_shoot[1] - obj.pos[1]]
                 speed = utils.normalize(vector, obj.bullet_speed)
             else:
-                speed = utils.normalize(obj.speed, obj.bullet_speed)
+                speed = utils.polar2cartesian([obj.bullet_speed, 2 * math.pi * random()])
         if not damage:
             damage = obj.bullet_damage
         bullet = Bullet(obj.pos.copy(), speed, obj, damage)
-        if target:
-            bullet.target_move = target
         game.add_effect(bullet)
         for func in obj.on_shoot:
             func(obj, game, bullet)
+        return bullet
 
     @staticmethod
     def collision(obj, game):
