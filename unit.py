@@ -13,7 +13,7 @@ import math
 class Unit(Object):
 
     @staticmethod
-    def shoot(obj, game, charge_cost=0.1, speed=None, damage=None):
+    def shoot(obj, game, charge_cost=0.1, speed=None, damage=None, target=None):
         if obj.charge < charge_cost:
             return
         obj.charge -= charge_cost
@@ -27,6 +27,8 @@ class Unit(Object):
         if not damage:
             damage = obj.bullet_damage
         bullet = Bullet(obj.pos.copy(), speed, obj, damage)
+        if target:
+            bullet.target_move = target
         game.add_effect(bullet)
         for func in obj.on_shoot:
             func(obj, game, bullet)

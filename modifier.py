@@ -33,6 +33,56 @@ class BaseModifier:
         self.on_update = [self.process]
 
 
+class DelayedShot(BaseModifier):
+
+    def __init__(self, holder, duration, game, damage, speed, target=None):
+        super().__init__(holder, duration)
+        self._game = game
+        self._bullet_damage = damage
+        self._bullet_speed = speed
+        self._bullet_target = target
+
+    def detach(self):
+        self._holder.shoot(self._holder, self._game, 0., self._bullet_speed, self._bullet_damage)
+
+    def draw(self, game, surface, erase):
+        pass
+
+
+class Explode(BaseModifier):
+
+    def __init__(self, holder, duration, game, damage):
+        super().__init__(holder, duration)
+        self._game = game
+        self._explode_damage = damage
+
+    def detach(self):
+        self._holder.is_active = False
+        explosion = Explosion(self._holder.pos.copy(), self._holder.source, self._explode_damage)
+        self._game.add_effect(explosion)
+
+    def draw(self, game, surface, erase):
+        pass
+
+
+class SplashShot(BaseModifier):
+
+    def __init__(self, holder, duration):
+        super().__init__(holder, duration)
+
+        def splash_shot(obj, game, target):
+            explosion = Explosion(obj.pos.copy(), obj.source, obj.damage)
+            game.add_effect(explosion)
+        self._effect = lambda _, __, bullet: bullet.on_hit.append(splash_shot)
+        self._holder.on_shoot.append(self._effect)
+
+    def detach(self):
+        self._holder.on_shoot.remove(self._effect)
+
+    def draw(self, game, surface, erase):
+        pass
+
+
 class SpreadShot(BaseModifier):
 
     def __init__(self, holder, duration, count=4, spread=5.*random() + 10.):
@@ -82,6 +132,8 @@ class ActiveDefense(BaseModifier):
 
     @staticmethod
     def spawn_bullet(self, game):
+        if not self.is_active or not self._holder.is_active:
+            return #TODO find why this happens
         if self._spawn_countdown == 0:
             self._spawn_countdown = self._spawn_period
             self._bullets = [o for o in self._bullets if o.is_active]
@@ -125,21 +177,6 @@ class ActiveDefense(BaseModifier):
         pygame.draw.circle(surface, color, draw_pos, 3, 1)
 
 
-class DelayedShot(BaseModifier):
-
-    def __init__(self, holder, duration, game, damage, speed):
-        super().__init__(holder, duration)
-        self._game = game
-        self._bullet_damage = damage
-        self._bullet_speed = speed
-
-    def detach(self):
-        self._holder.shoot(self._holder, self._game, 0., self._bullet_speed, self._bullet_damage)
-
-    def draw(self, game, surface, erase):
-        pass
-
-
 class ChainShot(BaseModifier):
 
     def __init__(self, holder, duration, damage_drop=0.3):
@@ -150,7 +187,9 @@ class ChainShot(BaseModifier):
 
         def start_auto_shot(obj, game, bullet):
             if bullet.damage > 0.1:
-                game.add_effect(DelayedShot(obj, 10., game, bullet.damage * self._damage_drop, bullet.speed))
+                game.add_effect(
+                    DelayedShot(obj, 10., game, bullet.damage * self._damage_drop, bullet.speed, bullet.target_move)
+                )
         self._effect = start_auto_shot
         self._holder.on_shoot.append(self._effect)
 
@@ -178,26 +217,47 @@ class ChainShot(BaseModifier):
             pygame.draw.line(surface, color, pos_start, pos_end)
 
 
-class SplashShot(BaseModifier):
+class HomingShot(BaseModifier):
 
-    def __init__(self, holder, duration):
+    def __init__(self, holder, duration, damage=0.2):
         super().__init__(holder, duration)
+        self._damage = damage
 
-        def splash_attack(obj, game, target):
-            explosion = Explosion(obj.pos.copy(), obj.source, obj.damage)
-            game.add_effect(explosion)
+        def rotate(obj, game):
+            obj._phi += 2. * math.pi / 120.
+            obj._phi %= 2. * math.pi
+        self._phi = 2. * math.pi * random()
+        self.on_update.append(rotate)
 
-        def add_splash_attack(obj, game, bullet):
-            bullet.on_hit.append(splash_attack)
+        def homing_shot(obj, game, to_hit):
+            o = obj.source
+            if not o or to_hit.defenders:
+                return
+            if o != self._holder:
+                raise EnvironmentError("Source of bullet is not holder of modifier")
+            self._holder.shoot(o, game, 0., utils.polar2cartesian([o.bullet_speed, self._phi]), self._damage, to_hit.pos)
 
-        self._effect = add_splash_attack
+        def apply_homing_shot(obj, game, bullet):
+            bullet.on_hit.append(homing_shot)
+            game.add_effect(Explode(bullet, 250, game, self._damage))
+        self._effect = apply_homing_shot
         self._holder.on_shoot.append(self._effect)
 
     def detach(self):
         self._holder.on_shoot.remove(self._effect)
 
     def draw(self, game, surface, erase):
-        pass
+        if erase:
+            color = (255., 255., 255.)
+        else:
+            color = (0., 0., 255.) if self._holder == game.get_player() else (255., 0., 0.)
+        points = []
+        for vertex in [utils.polar2cartesian([self._holder.radius + 6., self._phi - 0.05 * math.pi]),
+                       utils.polar2cartesian([self._holder.radius + 9., self._phi]),
+                       utils.polar2cartesian([self._holder.radius + 6., self._phi + 0.05 * math.pi])]:
+            points.append([round(self._holder.pos[0] + vertex[0]),
+                           round(self._holder.pos[1] + vertex[1])])
+        pygame.draw.lines(surface, color, True, points, 1)
 
 
 class Defenders(BaseModifier):
@@ -234,13 +294,14 @@ class Defenders(BaseModifier):
         o = self._defender
         for i in range(N):
             pos = [self._holder.pos[0] + (o.pos[0] - self._holder.pos[0]) * (i*i) / (N*N),
-                    self._holder.pos[1] + (o.pos[1] - self._holder.pos[1]) * (i*i) / (N*N)]
+                   self._holder.pos[1] + (o.pos[1] - self._holder.pos[1]) * (i*i) / (N*N)]
             if utils.dist(pos, o.pos) < o.radius:
                 continue
             if utils.dist(pos, self._holder.pos) < self._holder.radius:
                 continue
             draw_pos = [int(pos[0]), int(pos[1])]
             surface.set_at(draw_pos, color)
+
 
 class ZapField(BaseModifier):
 

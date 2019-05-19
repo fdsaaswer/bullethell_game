@@ -51,15 +51,58 @@ def collide(obj, anchor):  # modifies obj.speed
         raise AttributeError("Coordinate conversion failed: mismatch")
     if abs(speed[1] - approach[1]) > 0.5 * math.pi:
         speed[1] = approach[1] + math.pi
-        speed[0] *= 1.25
     else:
         speed[1] = 2. * approach[1] + math.pi - speed[1]
-        speed[0] *= 0.8
     obj.speed = polar2cartesian(speed)
 
 
 def shift_to(value, target, step):
+    """
+    Bring value closer to target by shift
+
+    :param value: initial value
+    :param target: target value
+    :param step: maximum difference
+    :return: updated value
+
+    >>> shift_to(0, 1, 2)
+    1
+    >>> shift_to(2, 1, 2)
+    1
+    >>> shift_to(0, 0, 2)
+    0
+    >>> shift_to(0, 2, 1)
+    1
+    >>> shift_to(2, 0, 1)
+    1
+    """
     if value < target:
-        return max(value + step, target)
+        return min(value + step, target)
     else:
-        return min(value - step, target)
+        return max(value - step, target)
+
+def periodic_shift_to(value, target, step, period=2*math.pi):
+    """
+    Bring value closer to target by shift, taking period into account
+
+    >>> periodic_shift_to(0, 5, 1, 10)
+    1
+    >>> periodic_shift_to(0, 5, 10, 10)
+    5
+    >>> periodic_shift_to(0, 8, 1, 10)
+    9
+    >>> periodic_shift_to(0, 9, 2, 10)
+    9
+    >>> periodic_shift_to(9, 1, 2, 10)
+    1
+    >>> periodic_shift_to(9, 1, 1, 10)
+    0
+    """
+    diff = abs(value - target)
+    if diff <= period - diff:
+        return shift_to(value, target, step)
+    else:
+        if value > target:
+            return shift_to(value - period, target, step) % period
+        else:
+            return shift_to(value + period, target, step) % period

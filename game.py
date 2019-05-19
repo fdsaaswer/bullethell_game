@@ -30,6 +30,7 @@ class Game:
 
     def player_powerup(self):
         new_modifier = choice([
+            modifier.HomingShot,
             modifier.ChainShot,
             modifier.SplashShot,
             modifier.SpreadShot,
@@ -76,17 +77,22 @@ class Game:
             return [o for o in self._units if o.is_active and o != obj and function(obj, o) and utils.dist(o.pos, obj.pos) < radius]
 
     def get_colliding_units(self, obj):
-        return self.get_units(obj, 0., lambda obj, o: utils.dist(obj.pos, o.pos) < obj.radius + o.radius)
+        return self.get_units(obj, 0., lambda o1, o2: utils.dist(o1.pos, o2.pos) < o1.radius + o2.radius)
 
     def update(self):
         self._bgr.update()
-        for obj in self._effects + self._units:
+        for obj in self._units:
+            if obj.is_active:
+                for func in obj.on_update:
+                    func(obj, self)
+        self._units = [obj for obj in self._units if obj.is_active]
+
+        for obj in self._effects:
             if obj.is_active:
                 for func in obj.on_update:
                     func(obj, self)
         self._effects = [obj for obj in self._effects if obj.is_active]
-        self._units = [obj for obj in self._units if obj.is_active]
-        #print(len(self._effects), len(self._units))
+
         if not self._player.is_active:
             exit(0)
         if random() < 0.02:
@@ -110,6 +116,8 @@ class Game:
                     apply_effect(self, obj, modifier.ChainShot(obj, 0, 0.5))
                 if random() < 0.05:
                     apply_effect(self, obj, modifier.SpreadShot(obj, 0, 5, 15.))
+                if random() < 0.1:
+                    apply_effect(self, obj, modifier.HomingShot(obj, 0, 0.5))
             if random() < 0.05:
                 apply_effect(self, obj, modifier.Defenders(obj, 0))
             if random() < 0.05:
